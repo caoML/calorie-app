@@ -1,0 +1,100 @@
+.page-templates {
+  padding: 24rpx;
+  padding-bottom: 100rpx;
+}
+
+.tips {
+  text-align: center;
+  padding: 60rpx 40rpx;
+  color: var(--ink-3);
+  font-size: 26rpx;
+  line-height: 1.8;
+}
+
+.template-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.template-card {
+  background: var(--surface);
+  border-radius: 24rpx;
+  padding: 28rpx;
+  border: 1rpx solid var(--line);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.card-left {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+}
+
+.card-icon {
+  font-size: 40rpx;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.card-name {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.card-meta {
+  font-size: 22rpx;
+  color: var(--ink-3);
+}
+
+.card-delete {
+  font-size: 24rpx;
+  color: var(--coral);
+  padding: 8rpx 16rpx;
+}
+
+.card-items {
+  background: var(--bg);
+  border-radius: 16rpx;
+  padding: 4rpx 20rpx;
+}
+
+.card-item {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid var(--line);
+}
+
+.card-item:last-child {
+  border-bottom: none;
+}
+
+.food-name {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--ink);
+}
+
+.food-amount {
+  font-size: 22rpx;
+  color: var(--ink-3);
+  margin-right: 16rpx;
+}
+
+.food-kcal {
+  font-size: 24rpx;
+  color: var(--ink);
+  font-weight: 600;
+}

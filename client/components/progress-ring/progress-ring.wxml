@@ -1,0 +1,12 @@
+<!-- 进度环组件 -->
+<view class="progress-ring-wrap">
+  <canvas 
+    canvas-id="progressRing" 
+    id="progressRing"
+    class="progress-canvas"
+    style="width: {{size}}rpx; height: {{size}}rpx;"
+  />
+  <view class="progress-center">
+    <text class="progress-percent">{{percent}}%</text>
+  </view>
+</view>

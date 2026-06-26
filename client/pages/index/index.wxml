@@ -1,0 +1,158 @@
+<!-- 首页 - 今日热量记录 -->
+<view class="page-index">
+  <!-- 今日热量概览 -->
+  <view class="card summary-card">
+    <view class="summary-header">
+      <text class="summary-date">{{todayStr}}</text>
+      <text class="summary-streak" wx:if="{{streak > 0}}">🔥 连续{{streak}}天</text>
+    </view>
+    <view class="summary-body">
+      <view class="summary-ring-wrap">
+        <progress-ring 
+          current="{{todayTotal}}" 
+          target="{{dailyTarget}}"
+          size="{{150}}"
+        />
+        <text class="summary-target">目标 {{dailyTarget}} 大卡</text>
+      </view>
+    </view>
+    <view class="summary-stats">
+      <view class="summary-consumed">
+        <text class="stats-number">{{todayTotal}}</text>
+        <text class="stats-label">已摄入</text>
+      </view>
+      <view class="summary-divider"></view>
+      <view class="summary-remaining">
+        <text class="stats-number {{remaining < 0 ? 'over' : ''}}">{{remaining}}</text>
+        <text class="stats-label">{{remaining >= 0 ? '剩余可摄入' : '已超出'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索/输入入口 -->
+  <view class="card search-card" bindtap="goToSearch">
+    <view class="search-icon">🔍</view>
+    <text class="search-placeholder">搜索食物 / 输入能量(kJ)...</text>
+  </view>
+
+  <!-- ⚡ 快捷记录区 -->
+  <view class="section quick-section">
+    <view class="section-header">
+      <text class="section-title">⚡ 快捷记录</text>
+      <text class="section-action" bindtap="onEditQuickFoods">编辑</text>
+    </view>
+    <view class="quick-grid">
+      <view 
+        class="quick-item" 
+        wx:for="{{quickFoods}}" 
+        wx:key="id"
+        bindtap="onQuickRecord"
+        bindlongpress="onQuickItemLongPress"
+        data-item="{{item}}"
+      >
+        <text class="quick-icon">{{item.icon}}</text>
+        <text class="quick-name">{{item.name}}</text>
+        <text class="quick-kcal">{{item.kcal}}大卡</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 🍱 我的常吃（餐食模板）-->
+  <view class="section" wx:if="{{mealTemplates.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">🍱 我的常吃</text>
+      <text class="section-action" bindtap="goToTemplateManage">管理</text>
+    </view>
+    <view class="template-list">
+      <view 
+        class="template-card" 
+        wx:for="{{mealTemplates}}" 
+        wx:key="id"
+        bindtap="onUseTemplate"
+        data-template="{{item}}"
+      >
+        <view class="template-left">
+          <text class="template-icon">{{item.icon}}</text>
+          <view class="template-info">
+            <text class="template-name">{{item.name}}</text>
+            <text class="template-detail">{{item.items.length}}种食物 · {{item.totalKcal}}大卡</text>
+          </view>
+        </view>
+        <view class="template-action">
+          <text class="template-btn">一键记录</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最近吃过 -->
+  <view class="section" wx:if="{{recentFoods.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">⏱ 最近吃过</text>
+    </view>
+    <scroll-view scroll-x class="recent-scroll">
+      <view class="recent-list">
+        <food-card
+          wx:for="{{recentFoods}}"
+          wx:key="id"
+          food="{{item}}"
+          compact="{{true}}"
+          bindtap="onRecentFoodTap"
+          data-food="{{item}}"
+        />
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 今日记录明细 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">📋 今日记录</text>
+    </view>
+    
+    <!-- 按餐次分组 -->
+    <view class="meal-group" wx:for="{{meals}}" wx:key="key">
+      <view class="meal-header">
+        <text class="meal-name">{{item.name}}</text>
+        <view class="meal-header-right">
+          <text class="meal-total">{{item.total}} 大卡</text>
+          <!-- 保存为模板按钮 -->
+          <text 
+            class="meal-save-tpl" 
+            wx:if="{{item.records.length >= 2}}"
+            catchtap="onSaveAsTemplate"
+            data-meal="{{item}}"
+          >💾</text>
+        </view>
+      </view>
+      <view class="meal-items" wx:if="{{item.records.length > 0}}">
+        <view 
+          class="meal-item" 
+          wx:for="{{item.records}}" 
+          wx:for-item="record" 
+          wx:key="id"
+          bindlongpress="onRecordLongPress"
+          data-record="{{record}}"
+        >
+          <view class="item-name-wrap">
+            <text class="item-name">{{record.foodName}}</text>
+            <text class="item-share-tag" wx:if="{{record.sharePeople > 1}}">🍽️ {{record.sharePeople}}人分</text>
+          </view>
+          <text class="item-amount">{{record.amount}}{{record.unit}}</text>
+          <text class="item-kcal">{{record.kcal}} 大卡</text>
+        </view>
+      </view>
+      <view class="meal-empty" wx:else>
+        <text>还没记录</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 记录弹窗 -->
+  <record-modal
+    show="{{showRecordModal}}"
+    food="{{selectedFood}}"
+    bind:confirm="onRecordConfirm"
+    bind:close="onRecordModalClose"
+  />
+</view>

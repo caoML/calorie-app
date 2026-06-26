@@ -1,0 +1,127 @@
+<!-- 记录弹窗组件 -->
+<view class="modal-mask" wx:if="{{show}}" bindtap="onClose" catchtouchmove="preventMove">
+  <view class="modal-content" catchtap="preventBubble">
+    <!-- 标题 -->
+    <view class="modal-header">
+      <text class="modal-title">{{food.name}}</text>
+      <text class="modal-subtitle" wx:if="{{!food.customKcal}}">{{food.kcalPer100g}} 大卡/100g</text>
+      <text class="modal-source" wx:if="{{food.source === 'ai'}}">🤖 AI估算</text>
+      <text class="modal-source user" wx:if="{{food.isUserFood && food.source !== 'ai'}}">👤 我的食物</text>
+      <view class="modal-close" bindtap="onClose">✕</view>
+    </view>
+
+    <!-- 份量选择（常规食物） -->
+    <view class="portion-section" wx:if="{{!food.customKcal}}">
+      <view class="portion-label">选择份量</view>
+      
+      <!-- 快捷份量按钮 -->
+      <view class="portion-quick">
+        <view 
+          class="portion-btn {{selectedPortion === item.value ? 'active' : ''}}"
+          wx:for="{{portionOptions}}"
+          wx:key="value"
+          bindtap="selectPortion"
+          data-value="{{item.value}}"
+          data-label="{{item.label}}"
+        >{{item.label}}</view>
+      </view>
+
+      <!-- 自定义克数 -->
+      <view class="portion-custom">
+        <text class="custom-label">自定义:</text>
+        <input 
+          class="custom-input" 
+          type="number" 
+          value="{{customGrams}}" 
+          bindinput="onCustomInput"
+          placeholder="输入克数"
+        />
+        <text class="custom-suffix">克</text>
+      </view>
+    </view>
+
+    <!-- 分食设置 -->
+    <view class="share-section" wx:if="{{!food.customKcal}}">
+      <view class="share-header" bindtap="toggleShare">
+        <text class="share-label">🍽️ 分食</text>
+        <text class="share-toggle">{{showShare ? '收起' : (sharePeople > 1 ? sharePeople + '人分食' : '独自享用')}}</text>
+      </view>
+
+      <view class="share-body" wx:if="{{showShare}}">
+        <!-- 分食人数 -->
+        <view class="share-people">
+          <text class="share-sub-label">几人分食</text>
+          <view class="share-people-options">
+            <view 
+              class="share-btn {{sharePeople === item ? 'active' : ''}}"
+              wx:for="{{[1,2,3,4,5]}}"
+              wx:key="*this"
+              bindtap="selectSharePeople"
+              data-value="{{item}}"
+            >{{item === 1 ? '独享' : item + '人'}}</view>
+          </view>
+        </view>
+
+        <!-- 分食比例（人数 > 1 时显示） -->
+        <view class="share-ratio" wx:if="{{sharePeople > 1}}">
+          <text class="share-sub-label">我吃的比例</text>
+          <view class="share-ratio-options">
+            <view 
+              class="ratio-btn {{shareRatio === 'less' ? 'active' : ''}}"
+              bindtap="selectShareRatio"
+              data-value="less"
+            >
+              <text class="ratio-icon">🤏</text>
+              <text class="ratio-text">少一些</text>
+              <text class="ratio-desc">约 1/{{sharePeople + 1}}</text>
+            </view>
+            <view 
+              class="ratio-btn {{shareRatio === 'equal' ? 'active' : ''}}"
+              bindtap="selectShareRatio"
+              data-value="equal"
+            >
+              <text class="ratio-icon">⚖️</text>
+              <text class="ratio-text">均分</text>
+              <text class="ratio-desc">约 1/{{sharePeople}}</text>
+            </view>
+            <view 
+              class="ratio-btn {{shareRatio === 'more' ? 'active' : ''}}"
+              bindtap="selectShareRatio"
+              data-value="more"
+            >
+              <text class="ratio-icon">💪</text>
+              <text class="ratio-text">多一些</text>
+              <text class="ratio-desc">约 {{sharePeople - 1}}/{{sharePeople}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 餐次选择 -->
+    <view class="meal-section">
+      <view class="meal-label">记为</view>
+      <view class="meal-options">
+        <view 
+          class="meal-btn {{selectedMeal === item.key ? 'active' : ''}}"
+          wx:for="{{mealOptions}}"
+          wx:key="key"
+          bindtap="selectMeal"
+          data-key="{{item.key}}"
+        >{{item.name}}</view>
+      </view>
+    </view>
+
+    <!-- 预估热量 -->
+    <view class="estimate-section">
+      <view class="estimate-left">
+        <text class="estimate-label">你的实际摄入</text>
+        <text class="estimate-note" wx:if="{{sharePeople > 1}}">总{{totalKcal}}大卡 ÷ {{shareText}}</text>
+      </view>
+      <text class="estimate-value">≈ {{estimatedKcal}} 大卡</text>
+    </view>
+
+    <!-- 确认按钮 -->
+    <button class="confirm-btn" bindtap="onConfirm">✓ 记录</button>
+  </view>
+</view>

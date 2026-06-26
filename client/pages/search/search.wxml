@@ -1,0 +1,236 @@
+<!-- 搜索页 -->
+<view class="page-search">
+  <!-- 搜索框 -->
+  <view class="search-bar">
+    <view class="search-input-wrap">
+      <text class="search-icon">🔍</text>
+      <input 
+        class="search-input" 
+        placeholder="搜索食物名称 / 输入能量(kJ)" 
+        value="{{keyword}}"
+        focus="{{true}}"
+        bindinput="onInput"
+        bindconfirm="onSearch"
+        confirm-type="search"
+      />
+      <view class="search-clear" wx:if="{{keyword}}" bindtap="clearKeyword">✕</view>
+    </view>
+  </view>
+
+  <!-- kJ 快速换算提示 -->
+  <view class="kj-tip card" wx:if="{{isKjInput}}">
+    <view class="kj-tip-content">
+      <text class="kj-value">{{keyword}} kJ</text>
+      <text class="kj-arrow">≈</text>
+      <text class="kcal-value">{{kjToKcalResult}} 大卡</text>
+    </view>
+    <view class="btn-primary kj-record-btn" bindtap="onKjRecord">直接记录</view>
+  </view>
+
+  <!-- 搜索结果 -->
+  <view class="search-results" wx:if="{{results.length > 0}}">
+    <!-- 用户私人库的结果 -->
+    <view wx:if="{{userResults.length > 0}}" class="result-group">
+      <view class="result-group-title">👤 我的食物</view>
+      <view 
+        class="result-item user-food-item" 
+        wx:for="{{userResults}}" 
+        wx:key="id"
+        bindtap="onResultTap"
+        data-food="{{item}}"
+      >
+        <view class="result-info">
+          <text class="result-name">{{item.name}}</text>
+          <text class="result-source">{{item.source === 'ai' ? '🤖 AI估算' : '手动添加'}}</text>
+        </view>
+        <view class="result-kcal">
+          <text class="result-kcal-num">{{item.kcalPer100g}}</text>
+          <text class="result-kcal-unit">大卡/100g</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 公共库的结果 -->
+    <view wx:if="{{systemResults.length > 0}}" class="result-group">
+      <view class="result-group-title" wx:if="{{userResults.length > 0}}">📚 食物库</view>
+      <view 
+        class="result-item" 
+        wx:for="{{systemResults}}" 
+        wx:key="id"
+        bindtap="onResultTap"
+        data-food="{{item}}"
+      >
+        <view class="result-info">
+          <text class="result-name">{{item.name}}</text>
+          <text class="result-tip" wx:if="{{item.tip}}">{{item.tip}}</text>
+        </view>
+        <view class="result-kcal">
+          <text class="result-kcal-num">{{item.kcalPer100g}}</text>
+          <text class="result-kcal-unit">大卡/100g</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索为空 — 改造后的空状态 -->
+  <view class="search-empty-new" wx:if="{{keyword && !isKjInput && results.length === 0 && searched}}">
+    <view class="empty-header">
+      <text class="empty-icon">🤷</text>
+      <text class="empty-text">没有找到"{{keyword}}"</text>
+    </view>
+
+    <!-- 模糊推荐 -->
+    <view class="suggestion-section" wx:if="{{suggestions.length > 0}}">
+      <view class="suggestion-title">💡 你是不是要找：</view>
+      <view 
+        class="result-item" 
+        wx:for="{{suggestions}}" 
+        wx:key="id"
+        bindtap="onResultTap"
+        data-food="{{item}}"
+      >
+        <view class="result-info">
+          <text class="result-name">{{item.name}}</text>
+          <text class="result-tip" wx:if="{{item.tip}}">{{item.tip}}</text>
+        </view>
+        <view class="result-kcal">
+          <text class="result-kcal-num">{{item.kcalPer100g}}</text>
+          <text class="result-kcal-unit">大卡/100g</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="empty-actions">
+      <view class="action-card ai-card" bindtap="onAiEstimate">
+        <text class="action-icon">🤖</text>
+        <view class="action-text-wrap">
+          <text class="action-title">AI 帮我估算</text>
+          <text class="action-desc">智能估算"{{keyword}}"的热量</text>
+        </view>
+        <text class="action-arrow">→</text>
+      </view>
+
+      <view class="action-card manual-card" bindtap="onManualAdd">
+        <text class="action-icon">📝</text>
+        <view class="action-text-wrap">
+          <text class="action-title">手动添加</text>
+          <text class="action-desc">我知道热量，自己填写</text>
+        </view>
+        <text class="action-arrow">→</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- AI 估算中 loading -->
+  <view class="ai-loading" wx:if="{{aiLoading}}">
+    <view class="ai-loading-icon">🤖</view>
+    <text class="ai-loading-text">AI 正在估算"{{keyword}}"的热量...</text>
+  </view>
+
+  <!-- AI 估算结果 -->
+  <view class="ai-result" wx:if="{{aiResult && !aiLoading}}">
+    <view class="ai-result-header">
+      <text class="ai-result-title">🤖 AI 估算结果</text>
+      <text class="ai-confidence {{aiResult.confidence}}">
+        {{aiResult.confidence === 'high' ? '可信度高' : aiResult.confidence === 'medium' ? '可信度中' : '可信度低'}}
+      </text>
+    </view>
+    <view class="ai-result-body">
+      <view class="ai-result-name">{{aiResult.name}}</view>
+      <view class="ai-result-kcal">
+        <text class="ai-kcal-num">{{aiResult.kcalPer100g}}</text>
+        <text class="ai-kcal-unit">大卡/100g</text>
+      </view>
+      <view class="ai-result-tip" wx:if="{{aiResult.tip}}">{{aiResult.tip}}</view>
+      <view class="ai-result-servings">
+        <text class="ai-serving" wx:for="{{aiResult.servings}}" wx:key="label">
+          {{item.label}} ≈ {{item.kcal}}大卡
+        </text>
+      </view>
+    </view>
+    <view class="ai-result-note">⚠️ AI估算可能有±20%误差，仅供参考</view>
+    <view class="ai-result-actions">
+      <view class="ai-btn-use" bindtap="onUseAiResult">✓ 用这个记录</view>
+      <view class="ai-btn-edit" bindtap="onEditAiResult">✏️ 我来调整</view>
+    </view>
+  </view>
+
+  <!-- 手动添加食物弹窗 -->
+  <view class="modal-mask" wx:if="{{showManualModal}}" bindtap="closeManualModal" catchtouchmove="preventMove">
+    <view class="manual-modal" catchtap="preventBubble">
+      <view class="manual-header">
+        <text class="manual-title">手动添加食物</text>
+        <view class="manual-close" bindtap="closeManualModal">✕</view>
+      </view>
+
+      <view class="manual-form">
+        <view class="form-item">
+          <text class="form-label">食物名称</text>
+          <input class="form-input" value="{{manualForm.name}}" bindinput="onManualName" placeholder="如：酸菜鱼" />
+        </view>
+
+        <view class="form-item">
+          <text class="form-label">每100g热量（大卡）</text>
+          <input class="form-input" type="digit" value="{{manualForm.kcalPer100g}}" bindinput="onManualKcal" placeholder="如：150" />
+          <text class="form-hint">不确定？试试 AI 估算</text>
+        </view>
+
+        <view class="form-item">
+          <text class="form-label">类型</text>
+          <view class="form-tags">
+            <view 
+              class="form-tag {{manualForm.category === item.key ? 'active' : ''}}"
+              wx:for="{{foodCategories}}"
+              wx:key="key"
+              bindtap="onManualCategory"
+              data-key="{{item.key}}"
+            >{{item.name}}</view>
+          </view>
+        </view>
+      </view>
+
+      <button class="manual-save-btn" bindtap="saveManualFood">保存并记录</button>
+    </view>
+  </view>
+
+  <!-- 热门食物分类 -->
+  <view class="hot-section" wx:if="{{!keyword}}">
+    <view class="section-title">🔥 常见食物</view>
+    <view class="category-list">
+      <view 
+        class="category-tag {{activeCategory === item.key ? 'active' : ''}}" 
+        wx:for="{{categories}}" 
+        wx:key="key"
+        bindtap="onCategoryTap"
+        data-key="{{item.key}}"
+      >{{item.name}}</view>
+    </view>
+    <view class="category-foods">
+      <view 
+        class="result-item" 
+        wx:for="{{categoryFoods}}" 
+        wx:key="id"
+        bindtap="onResultTap"
+        data-food="{{item}}"
+      >
+        <view class="result-info">
+          <text class="result-name">{{item.name}}</text>
+          <text class="result-tip" wx:if="{{item.tip}}">{{item.tip}}</text>
+        </view>
+        <view class="result-kcal">
+          <text class="result-kcal-num">{{item.kcalPer100g}}</text>
+          <text class="result-kcal-unit">大卡/100g</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 记录弹窗 -->
+  <record-modal
+    show="{{showRecordModal}}"
+    food="{{selectedFood}}"
+    bind:confirm="onRecordConfirm"
+    bind:close="onRecordModalClose"
+  />
+</view>

@@ -1,0 +1,111 @@
+<!-- 个人设置页 -->
+<view class="page-profile">
+  <!-- 目标卡片 -->
+  <view class="card target-card">
+    <view class="target-title">每日目标热量</view>
+    <view class="target-value">{{dailyTarget}} <text class="target-unit">大卡</text></view>
+    <view class="target-detail">
+      <text>BMR: {{bmr}} kcal</text>
+      <text class="dot">·</text>
+      <text>TDEE: {{tdee}} kcal</text>
+    </view>
+  </view>
+
+  <!-- 身体数据 -->
+  <view class="card">
+    <view class="card-title">身体数据</view>
+    
+    <view class="form-item">
+      <text class="form-label">性别</text>
+      <view class="form-value">
+        <view class="gender-options">
+          <view class="gender-btn {{gender === 'male' ? 'active' : ''}}" bindtap="setGender" data-value="male">♂ 男</view>
+          <view class="gender-btn {{gender === 'female' ? 'active' : ''}}" bindtap="setGender" data-value="female">♀ 女</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">年龄</text>
+      <view class="form-value">
+        <input class="form-input" type="number" value="{{age}}" bindinput="onAgeInput" placeholder="请输入" />
+        <text class="form-suffix">岁</text>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">身高</text>
+      <view class="form-value">
+        <input class="form-input" type="digit" value="{{height}}" bindinput="onHeightInput" placeholder="请输入" />
+        <text class="form-suffix">cm</text>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">体重</text>
+      <view class="form-value">
+        <input class="form-input" type="digit" value="{{weight}}" bindinput="onWeightInput" placeholder="请输入" />
+        <text class="form-suffix">kg</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 活动量 -->
+  <view class="card">
+    <view class="card-title">活动量</view>
+    <view class="activity-list">
+      <view 
+        class="activity-item {{activityLevel === item.key ? 'active' : ''}}"
+        wx:for="{{activityOptions}}"
+        wx:key="key"
+        bindtap="setActivity"
+        data-key="{{item.key}}"
+      >
+        <text class="activity-name">{{item.name}}</text>
+        <text class="activity-desc">{{item.desc}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 目标 -->
+  <view class="card">
+    <view class="card-title">你的目标</view>
+    <view class="goal-list">
+      <view 
+        class="goal-item {{goal === item.key ? 'active' : ''}}"
+        wx:for="{{goalOptions}}"
+        wx:key="key"
+        bindtap="setGoal"
+        data-key="{{item.key}}"
+      >
+        <text class="goal-icon">{{item.icon}}</text>
+        <text class="goal-name">{{item.name}}</text>
+        <text class="goal-desc">{{item.desc}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 保存按钮 -->
+  <view class="save-btn-wrap">
+    <button class="btn-primary save-btn" bindtap="saveProfile">保存设置</button>
+  </view>
+
+  <!-- 统计 -->
+  <view class="card stats-card">
+    <view class="card-title">记录统计</view>
+    <view class="stats-row">
+      <view class="stat-item">
+        <text class="stat-num">{{totalDays}}</text>
+        <text class="stat-label">总记录天数</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-num">{{streak}}</text>
+        <text class="stat-label">连续记录</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-num">{{totalRecords}}</text>
+        <text class="stat-label">总记录条数</text>
+      </view>
+    </view>
+  </view>
+</view>

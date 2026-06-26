@@ -1,0 +1,246 @@
+/* 个人页样式 */
+.page-profile {
+  padding: 24rpx 24rpx 140rpx;
+}
+
+/* ===== 目标大卡（深墨绿仪表盘） ===== */
+.target-card {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(120% 120% at 0% 0%, #2C4334 0%, #1C2620 55%);
+  color: #fff;
+  text-align: center;
+  padding: 48rpx 40rpx;
+  border: none;
+  border-radius: 32rpx;
+  box-shadow: 0 16rpx 40rpx rgba(28, 38, 32, 0.28);
+}
+
+.target-card::before {
+  content: '';
+  position: absolute;
+  top: -90rpx;
+  left: -70rpx;
+  width: 280rpx;
+  height: 280rpx;
+  background: radial-gradient(circle, rgba(198, 242, 78, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.target-title {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 16rpx;
+  letter-spacing: 2rpx;
+  position: relative;
+}
+
+.target-value {
+  font-size: 88rpx;
+  font-weight: 800;
+  color: var(--lime);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -2rpx;
+  position: relative;
+}
+
+.target-unit {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.target-detail {
+  margin-top: 20rpx;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.55);
+  position: relative;
+}
+
+.dot {
+  margin: 0 14rpx;
+  color: var(--lime);
+}
+
+/* ===== 卡片标题 ===== */
+.card-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 26rpx;
+  letter-spacing: 1rpx;
+}
+
+/* ===== 表单项 ===== */
+.form-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid var(--line);
+}
+
+.form-item:last-child {
+  border-bottom: none;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: var(--ink);
+  font-weight: 500;
+  min-width: 100rpx;
+}
+
+.form-value {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.form-input {
+  width: 150rpx;
+  text-align: right;
+  font-size: 32rpx;
+  color: var(--ink);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.form-suffix {
+  font-size: 24rpx;
+  color: var(--ink-3);
+}
+
+/* 性别选择 */
+.gender-options {
+  display: flex;
+  gap: 16rpx;
+}
+
+.gender-btn {
+  padding: 12rpx 30rpx;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  border: 2rpx solid var(--line);
+}
+
+.gender-btn.active {
+  background: var(--lime-soft);
+  color: var(--lime-deep);
+  border-color: var(--lime-deep);
+  font-weight: 700;
+}
+
+/* ===== 活动量选择 ===== */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.activity-item {
+  padding: 22rpx 26rpx;
+  border-radius: 18rpx;
+  background: var(--surface-2);
+  border: 2rpx solid var(--line);
+}
+
+.activity-item.active {
+  background: var(--lime-soft);
+  border-color: var(--lime-deep);
+}
+
+.activity-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--ink);
+  display: block;
+}
+
+.activity-desc {
+  font-size: 22rpx;
+  color: var(--ink-3);
+  margin-top: 6rpx;
+  display: block;
+}
+
+/* ===== 目标选择 ===== */
+.goal-list {
+  display: flex;
+  gap: 16rpx;
+}
+
+.goal-item {
+  flex: 1;
+  text-align: center;
+  padding: 28rpx 12rpx;
+  border-radius: 18rpx;
+  background: var(--surface-2);
+  border: 2rpx solid var(--line);
+}
+
+.goal-item.active {
+  background: var(--lime-soft);
+  border-color: var(--lime-deep);
+}
+
+.goal-icon {
+  font-size: 44rpx;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.goal-name {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--ink);
+  display: block;
+}
+
+.goal-desc {
+  font-size: 20rpx;
+  color: var(--ink-3);
+  margin-top: 6rpx;
+  display: block;
+}
+
+/* ===== 保存按钮 ===== */
+.save-btn-wrap {
+  margin: 36rpx 0;
+}
+
+.save-btn {
+  width: 100%;
+  height: 92rpx;
+  line-height: 92rpx;
+  font-size: 32rpx;
+}
+
+/* ===== 统计 ===== */
+.stats-row {
+  display: flex;
+  justify-content: space-around;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-num {
+  font-size: 46rpx;
+  font-weight: 800;
+  color: var(--lime-deep);
+  display: block;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1rpx;
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: var(--ink-3);
+  margin-top: 10rpx;
+}

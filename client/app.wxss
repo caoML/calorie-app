@@ -1,0 +1,75 @@
+/* ===== 全局设计系统：Athletic Nutrition ===== */
+page {
+  /* 背景 / 表面 */
+  --bg: #F4F1E9;          /* 暖米白纸感 */
+  --surface: #FFFFFF;
+  --surface-2: #FBFAF5;
+
+  /* 文字墨色 */
+  --ink: #19211B;         /* 近黑墨绿，主文字 */
+  --ink-2: #5C6359;       /* 次要文字 */
+  --ink-3: #9CA298;       /* 辅助/占位 */
+  --line: rgba(25, 33, 27, 0.07);
+
+  /* 品牌色：深森林 + 亮柠檬 */
+  --forest: #1C2620;      /* 深墨绿（数据大卡底） */
+  --forest-2: #28392E;
+  --lime: #C6F24E;        /* 亮柠檬绿（深底高亮） */
+  --lime-soft: #EAF7C9;   /* 浅柠檬底（浅底选中态） */
+  --lime-deep: #5E8B00;   /* 深柠檬绿（浅底文字/数字） */
+
+  /* 状态色 */
+  --coral: #FF6B5E;       /* 超标 / 警示 */
+  --amber: #F2A33C;
+
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  font-size: 28rpx;
+  color: var(--ink);
+  background-color: var(--bg);
+  box-sizing: border-box;
+}
+
+.container {
+  padding: 20rpx 30rpx;
+}
+
+/* 通用卡片 */
+.card {
+  background-color: var(--surface);
+  border-radius: 28rpx;
+  padding: 32rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 8rpx 28rpx rgba(25, 33, 27, 0.05);
+  border: 1rpx solid var(--line);
+}
+
+/* 主按钮：lime 底 + 墨绿字，胶囊 */
+.btn-primary {
+  background-color: var(--lime);
+  color: var(--forest);
+  border-radius: 999rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+  padding: 22rpx 40rpx;
+  border: none;
+  text-align: center;
+  letter-spacing: 1rpx;
+}
+
+.btn-primary::after {
+  border: none;
+}
+
+/* 数字强调：紧凑等宽感 */
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  letter-spacing: -1rpx;
+}
+
+/* 文字省略 */
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

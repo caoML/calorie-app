@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "record-modal": "../../components/record-modal/record-modal"
+  },
+  "navigationBarTitleText": "搜索食物"
+}

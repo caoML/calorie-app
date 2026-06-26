@@ -1,0 +1,5 @@
+<!-- 食物卡片组件（用于最近吃过的横向展示） -->
+<view class="food-card {{compact ? 'compact' : ''}}">
+  <text class="food-name">{{food.name}}</text>
+  <text class="food-kcal">{{food.kcal || food.kcalPer100g}}大卡</text>
+</view>

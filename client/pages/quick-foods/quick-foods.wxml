@@ -1,0 +1,58 @@
+<!-- 快捷记录管理页 -->
+<view class="page-quick">
+  <view class="tips">
+    <text>点击可编辑，长按可拖拽排序，左滑可删除</text>
+  </view>
+
+  <!-- 现有的快捷食物列表 -->
+  <view class="quick-list">
+    <view 
+      class="quick-row" 
+      wx:for="{{quickFoods}}" 
+      wx:key="id"
+      bindlongpress="onLongPress"
+      data-item="{{item}}"
+      data-index="{{index}}"
+    >
+      <view class="row-left">
+        <text class="row-icon">{{item.icon}}</text>
+        <view class="row-info">
+          <text class="row-name">{{item.name}}</text>
+          <text class="row-detail">{{item.foodName}} · {{item.amount}}{{item.unit}} · {{item.kcal}}大卡</text>
+        </view>
+      </view>
+      <view class="row-actions">
+        <text class="row-delete" catchtap="onDelete" data-item="{{item}}">删除</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 添加新的快捷食物 -->
+  <view class="add-section">
+    <view class="section-title">添加快捷按钮</view>
+    <view class="add-form">
+      <view class="form-row">
+        <text class="form-label">显示名称</text>
+        <input class="form-input" placeholder="如：一碗米饭" value="{{form.name}}" bindinput="onFormInput" data-field="name"/>
+      </view>
+      <view class="form-row">
+        <text class="form-label">食物名</text>
+        <input class="form-input" placeholder="如：米饭" value="{{form.foodName}}" bindinput="onFormInput" data-field="foodName"/>
+      </view>
+      <view class="form-row">
+        <text class="form-label">份量</text>
+        <input class="form-input" type="digit" placeholder="如：200" value="{{form.amount}}" bindinput="onFormInput" data-field="amount"/>
+        <input class="form-input unit-input" placeholder="g" value="{{form.unit}}" bindinput="onFormInput" data-field="unit"/>
+      </view>
+      <view class="form-row">
+        <text class="form-label">热量(大卡)</text>
+        <input class="form-input" type="digit" placeholder="如：232" value="{{form.kcal}}" bindinput="onFormInput" data-field="kcal"/>
+      </view>
+      <view class="form-row">
+        <text class="form-label">图标</text>
+        <input class="form-input" placeholder="输入emoji如🍚" value="{{form.icon}}" bindinput="onFormInput" data-field="icon"/>
+      </view>
+      <button class="add-btn" bindtap="onAdd">添加</button>
+    </view>
+  </view>
+</view>

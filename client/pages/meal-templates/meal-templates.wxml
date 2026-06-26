@@ -1,0 +1,35 @@
+<!-- 餐食模板管理页 -->
+<view class="page-templates">
+  <view class="tips" wx:if="{{templates.length === 0}}">
+    <text>还没有常吃模板\n在首页记录一餐后，点击餐次右边的 💾 按钮即可保存为模板</text>
+  </view>
+
+  <!-- 模板列表 -->
+  <view class="template-list">
+    <view 
+      class="template-card" 
+      wx:for="{{templates}}" 
+      wx:key="id"
+    >
+      <view class="card-header">
+        <view class="card-left">
+          <text class="card-icon">{{item.icon}}</text>
+          <view class="card-info">
+            <text class="card-name">{{item.name}}</text>
+            <text class="card-meta">{{item.totalKcal}}大卡 · 已使用{{item.useCount}}次</text>
+          </view>
+        </view>
+        <text class="card-delete" catchtap="onDelete" data-id="{{item.id}}">删除</text>
+      </view>
+      
+      <!-- 食物明细 -->
+      <view class="card-items">
+        <view class="card-item" wx:for="{{item.items}}" wx:for-item="food" wx:key="foodName">
+          <text class="food-name">{{food.foodName}}</text>
+          <text class="food-amount">{{food.amount}}{{food.unit}}</text>
+          <text class="food-kcal">{{food.kcal}}大卡</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

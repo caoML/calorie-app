@@ -1,0 +1,27 @@
+/* 进度环样式 */
+.progress-ring-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-canvas {
+  display: block;
+}
+
+.progress-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.progress-percent {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #C6F24E;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1rpx;
+}
