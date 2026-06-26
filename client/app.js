@@ -1,7 +1,7 @@
 App({
   globalData: {
     userInfo: null,
-    baseUrl: 'http://localhost:3000/api', // 开发环境，上线后改为你的轻量云域名
+    baseUrl: 'http://106.54.31.24:3000/api', // 服务器地址；正式上线需改为 https 域名（微信要求）
     token: ''
   },
 
