@@ -37,9 +37,48 @@ export class RecordService {
     return { records, streak };
   }
 
-  // 删除记录
+  // 删除单条记录
   async delete(userId: number, recordId: number) {
     await this.recordRepo.delete({ id: recordId, userId });
+  }
+
+  // 清空某天的全部记录
+  async clearByDate(userId: number, date: string): Promise<number> {
+    const result = await this.recordRepo.delete({ userId, date });
+    return result.affected || 0;
+  }
+
+  // 获取历史每日热量汇总（最近 N 天）
+  async getHistory(userId: number, days = 30) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - (days - 1));
+    const startStr = startDate.toISOString().split('T')[0];
+
+    const rows = await this.recordRepo
+      .createQueryBuilder('record')
+      .select('record.date', 'date')
+      .addSelect('SUM(record.kcal)', 'total')
+      .addSelect('COUNT(*)', 'count')
+      .where('record.userId = :userId', { userId })
+      .andWhere('record.date >= :startStr', { startStr })
+      .groupBy('record.date')
+      .orderBy('record.date', 'DESC')
+      .getRawMany();
+
+    const list = rows.map((r) => ({
+      date: r.date,
+      total: Math.round(Number(r.total) || 0),
+      count: Number(r.count) || 0,
+    }));
+
+    const totalKcal = list.reduce((sum, item) => sum + item.total, 0);
+    const daysWithRecord = list.length;
+    const avg = daysWithRecord ? Math.round(totalKcal / daysWithRecord) : 0;
+
+    return {
+      list,
+      summary: { days: daysWithRecord, avg, total: totalKcal },
+    };
   }
 
   // 获取最近吃过的食物（去重，最近7天）

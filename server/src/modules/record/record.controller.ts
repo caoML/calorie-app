@@ -27,6 +27,13 @@ export class RecordController {
     return { code: 0, data };
   }
 
+  // 清空某天的全部记录
+  @Delete('clear')
+  async clearByDate(@CurrentUser('id') userId: number, @Query('date') date: string) {
+    const count = await this.recordService.clearByDate(userId, date);
+    return { code: 0, message: `已清空 ${count} 条记录`, data: { count } };
+  }
+
   @Delete(':id')
   async delete(@CurrentUser('id') userId: number, @Param('id') id: string) {
     await this.recordService.delete(userId, Number(id));
@@ -36,6 +43,19 @@ export class RecordController {
   @Get('recent-foods')
   async getRecentFoods(@CurrentUser('id') userId: number) {
     const data = await this.recordService.getRecentFoods(userId);
+    return { code: 0, data };
+  }
+
+  // 历史每日热量汇总（默认最近30天）
+  @Get('history')
+  async getHistory(
+    @CurrentUser('id') userId: number,
+    @Query('days') days?: string,
+  ) {
+    const data = await this.recordService.getHistory(
+      userId,
+      days ? Number(days) : 30,
+    );
     return { code: 0, data };
   }
 }
