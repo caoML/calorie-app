@@ -4,7 +4,8 @@
     "pages/search/search",
     "pages/profile/profile",
     "pages/quick-foods/quick-foods",
-    "pages/meal-templates/meal-templates"
+    "pages/meal-templates/meal-templates",
+    "pages/history/history"
   ],
   "window": {
     "backgroundTextStyle": "dark",

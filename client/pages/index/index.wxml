@@ -1,30 +1,53 @@
 <!-- 首页 - 今日热量记录 -->
-<view class="page-index">
-  <!-- 今日热量概览 -->
+<view class="page-index {{monsterLevel >= 5 ? 'page-over-budget' : ''}}">
+  <!-- 怪兽喊饿提示 -->
+  <view class="hungry-tip" wx:if="{{monsterHungry}}" bindtap="goToSearch">
+    <text class="hungry-icon">😿</text>
+    <text class="hungry-text">{{hungryMessage}}</text>
+    <text class="hungry-action">去记录 →</text>
+  </view>
+
+  <!-- 今日热量概览 - 卡路里小怪兽 -->
   <view class="card summary-card">
     <view class="summary-header">
       <text class="summary-date">{{todayStr}}</text>
-      <text class="summary-streak" wx:if="{{streak > 0}}">🔥 连续{{streak}}天</text>
-    </view>
-    <view class="summary-body">
-      <view class="summary-ring-wrap">
-        <progress-ring 
-          current="{{todayTotal}}" 
-          target="{{dailyTarget}}"
-          size="{{150}}"
-        />
-        <text class="summary-target">目标 {{dailyTarget}} 大卡</text>
+      <view class="streak-badge" wx:if="{{streak > 0}}" bindtap="showStreakDetail">
+        <text class="streak-fire">🔥</text>
+        <text class="streak-num">{{streak}}</text>
+        <text class="streak-label">天</text>
       </view>
     </view>
+
+    <!-- 怪兽主体 -->
+    <monster 
+      current="{{todayTotal}}" 
+      target="{{dailyTarget}}"
+      bind:tap="onMonsterTap"
+      bind:levelchange="onMonsterLevelChange"
+    />
+
+    <!-- 飞数动效 -->
+    <view 
+      class="fly-number {{item.animating ? 'fly-up' : ''}}" 
+      wx:for="{{flyNumbers}}" 
+      wx:key="id"
+    >{{item.kcal}} 大卡</view>
+
+    <!-- 底部数据栏 -->
     <view class="summary-stats">
       <view class="summary-consumed">
         <text class="stats-number">{{todayTotal}}</text>
         <text class="stats-label">已摄入</text>
       </view>
       <view class="summary-divider"></view>
+      <view class="summary-target-info">
+        <text class="stats-number target-num">{{dailyTarget}}</text>
+        <text class="stats-label">预算上限</text>
+      </view>
+      <view class="summary-divider"></view>
       <view class="summary-remaining">
-        <text class="stats-number {{remaining < 0 ? 'over' : ''}}">{{remaining}}</text>
-        <text class="stats-label">{{remaining >= 0 ? '剩余可摄入' : '已超出'}}</text>
+        <text class="stats-number {{remaining < 0 ? 'over' : ''}}">{{remaining < 0 ? '+' : ''}}{{remaining < 0 ? -remaining : remaining}}</text>
+        <text class="stats-label">{{remaining >= 0 ? '剩余' : '超出'}}</text>
       </view>
     </view>
   </view>
@@ -104,6 +127,15 @@
     </scroll-view>
   </view>
 
+  <!-- 营养均衡提示 -->
+  <view class="nutrition-tip-card" wx:if="{{nutritionTip}}">
+    <view class="nutrition-tip-icon">{{nutritionTip.icon}}</view>
+    <view class="nutrition-tip-content">
+      <text class="nutrition-tip-title">{{nutritionTip.title}}</text>
+      <text class="nutrition-tip-desc">{{nutritionTip.desc}}</text>
+    </view>
+  </view>
+
   <!-- 今日记录明细 -->
   <view class="section">
     <view class="section-header">
@@ -127,19 +159,34 @@
       </view>
       <view class="meal-items" wx:if="{{item.records.length > 0}}">
         <view 
-          class="meal-item" 
+          class="meal-item-swipe" 
           wx:for="{{item.records}}" 
           wx:for-item="record" 
           wx:key="id"
-          bindlongpress="onRecordLongPress"
-          data-record="{{record}}"
         >
-          <view class="item-name-wrap">
-            <text class="item-name">{{record.foodName}}</text>
-            <text class="item-share-tag" wx:if="{{record.sharePeople > 1}}">🍽️ {{record.sharePeople}}人分</text>
+          <!-- 滑出的操作按钮 -->
+          <view class="swipe-actions">
+            <view class="swipe-btn swipe-edit" bindtap="onEditRecord" data-record="{{record}}">编辑</view>
+            <view class="swipe-btn swipe-delete" bindtap="onDeleteRecord" data-record="{{record}}">删除</view>
           </view>
-          <text class="item-amount">{{record.amount}}{{record.unit}}</text>
-          <text class="item-kcal">{{record.kcal}} 大卡</text>
+          <!-- 内容区域 -->
+          <view 
+            class="meal-item {{record._swiped ? 'swiped' : ''}}"
+            bindtouchstart="onSwipeStart"
+            bindtouchmove="onSwipeMove"
+            bindtouchend="onSwipeEnd"
+            data-record-id="{{record.id}}"
+            data-meal-key="{{item.key}}"
+            bindlongpress="onRecordLongPress"
+            data-record="{{record}}"
+          >
+            <view class="item-name-wrap">
+              <text class="item-name">{{record.foodName}}</text>
+              <text class="item-share-tag" wx:if="{{record.sharePeople > 1}}">🍽️ {{record.sharePeople}}人分</text>
+            </view>
+            <text class="item-amount">{{record.amount}}{{record.unit}}</text>
+            <text class="item-kcal">{{record.kcal}} 大卡</text>
+          </view>
         </view>
       </view>
       <view class="meal-empty" wx:else>

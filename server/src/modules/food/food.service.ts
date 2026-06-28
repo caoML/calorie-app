@@ -97,6 +97,7 @@ export class FoodService implements OnModuleInit {
       // === 肉蛋 ===
       { name: '鸡胸肉', category: 'meat', kcalPer100g: 133, pinyin: 'jixiongrou', pinyinInitial: 'jxr', tip: '一块约150g', servings: JSON.stringify([{label:'1块(150g)',grams:150},{label:'半块(75g)',grams:75}]) },
       { name: '鸡蛋(煮)', category: 'meat', kcalPer100g: 144, pinyin: 'jidan', pinyinInitial: 'jd', tip: '一个约50g≈72大卡', servings: JSON.stringify([{label:'1个(50g)',grams:50},{label:'2个(100g)',grams:100}]) },
+      { name: '鸡蛋白(去黄)', category: 'meat', kcalPer100g: 48, pinyin: 'jidanbai', pinyinInitial: 'jdb', tip: '一个蛋白约33g≈16大卡，高蛋白低脂', servings: JSON.stringify([{label:'1个蛋白(33g)',grams:33},{label:'2个蛋白(66g)',grams:66},{label:'3个蛋白(99g)',grams:99}]) },
       { name: '牛肉(瘦)', category: 'meat', kcalPer100g: 106, pinyin: 'niurou', pinyinInitial: 'nr', servings: JSON.stringify([{label:'一份(100g)',grams:100},{label:'半份(50g)',grams:50}]) },
       { name: '猪肉(瘦)', category: 'meat', kcalPer100g: 143, pinyin: 'zhurou', pinyinInitial: 'zr', servings: JSON.stringify([{label:'一份(100g)',grams:100}]) },
       { name: '猪肉(五花)', category: 'meat', kcalPer100g: 349, pinyin: 'zhurouwuhua', pinyinInitial: 'zrwh', tags: '高脂', servings: JSON.stringify([{label:'一份(100g)',grams:100},{label:'半份(50g)',grams:50}]) },
@@ -138,7 +139,7 @@ export class FoodService implements OnModuleInit {
       { name: '豆浆(无糖)', category: 'drink', kcalPer100g: 31, pinyin: 'doujiang', pinyinInitial: 'dj', servings: JSON.stringify([{label:'1杯(300ml)',grams:300}]) },
       { name: '美式咖啡', category: 'drink', kcalPer100g: 2, pinyin: 'meishikafei', pinyinInitial: 'mskf', tip: '一杯约350ml≈7大卡', servings: JSON.stringify([{label:'1杯(350ml)',grams:350}]) },
       { name: '拿铁', category: 'drink', kcalPer100g: 40, pinyin: 'natie', pinyinInitial: 'nt', tip: '一杯约350ml≈140大卡', servings: JSON.stringify([{label:'1杯(350ml)',grams:350}]) },
-      { name: '奶茶', category: 'drink', kcalPer100g: 52, pinyin: 'naicha', pinyinInitial: 'nc', tip: '一杯约500ml≈260大卡', tags: '高糖', servings: JSON.stringify([{label:'中杯(500ml)',grams:500},{label:'大杯(700ml)',grams:700}]) },
+      { name: '奶茶', category: 'drink', kcalPer100g: 65, pinyin: 'naicha', pinyinInitial: 'nc', tip: '一杯约500ml≈325大卡', tags: '高糖', servings: JSON.stringify([{label:'中杯(500ml)',grams:500},{label:'大杯(700ml)',grams:700}]) },
       { name: '橙汁', category: 'drink', kcalPer100g: 45, pinyin: 'chengzhi', pinyinInitial: 'cz', servings: JSON.stringify([{label:'1杯(250ml)',grams:250}]) },
 
       // === 零食 ===

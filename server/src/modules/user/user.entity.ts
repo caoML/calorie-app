@@ -29,6 +29,16 @@ export class User {
   @Column({ default: 1800 })
   dailyTarget: number; // 每日目标热量（大卡）
 
+  @Column({ nullable: true })
+  isManualTarget: boolean; // 是否手动设置预算
+
+  // 提醒设置
+  @Column({ default: false })
+  reminderEnabled: boolean; // 是否开启记录提醒
+
+  @Column({ nullable: true })
+  reminderTimes: string; // JSON: ["08:00","12:00","18:00"] 提醒时间点
+
   @CreateDateColumn()
   createdAt: Date;
 

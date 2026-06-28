@@ -40,6 +40,24 @@ export class UserService {
     return { totalRecords, totalDays, streak };
   }
 
+  // 获取提醒设置
+  async getReminder(userId: number) {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    return {
+      enabled: user?.reminderEnabled || false,
+      times: user?.reminderTimes ? JSON.parse(user.reminderTimes) : ['08:00', '12:00', '18:00'],
+    };
+  }
+
+  // 更新提醒设置
+  async updateReminder(userId: number, data: { enabled: boolean; times: string[] }) {
+    await this.userRepo.update(userId, {
+      reminderEnabled: data.enabled,
+      reminderTimes: JSON.stringify(data.times || ['08:00', '12:00', '18:00']),
+    });
+    return this.getReminder(userId);
+  }
+
   private async calculateStreak(userId: number): Promise<number> {
     // 获取所有有记录的日期（倒序）
     const dates = await this.recordRepo

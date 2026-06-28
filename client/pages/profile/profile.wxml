@@ -1,13 +1,41 @@
 <!-- 个人设置页 -->
 <view class="page-profile">
-  <!-- 目标卡片 -->
+  <!-- 预算上限卡片 -->
   <view class="card target-card">
-    <view class="target-title">每日目标热量</view>
-    <view class="target-value">{{dailyTarget}} <text class="target-unit">大卡</text></view>
-    <view class="target-detail">
-      <text>BMR: {{bmr}} kcal</text>
-      <text class="dot">·</text>
-      <text>TDEE: {{tdee}} kcal</text>
+    <view class="target-header">
+      <view class="target-title">每日预算上限</view>
+      <view class="target-mode-switch" bindtap="toggleTargetMode">
+        <text class="mode-text">{{isManualTarget ? '手动设置' : '自动计算'}}</text>
+        <text class="mode-toggle-icon">切换</text>
+      </view>
+    </view>
+
+    <!-- 手动设置模式 -->
+    <view class="target-manual" wx:if="{{isManualTarget}}">
+      <view class="target-input-wrap">
+        <view class="target-adjust-btn" bindtap="adjustTarget" data-delta="{{-50}}">−</view>
+        <input 
+          class="target-input" 
+          type="number" 
+          value="{{dailyTarget}}" 
+          bindinput="onTargetInput"
+          bindblur="onTargetBlur"
+        />
+        <view class="target-adjust-btn" bindtap="adjustTarget" data-delta="{{50}}">+</view>
+      </view>
+      <text class="target-unit-label">大卡/天</text>
+      <view class="target-hint">直接输入你想控制的每日热量上限</view>
+    </view>
+
+    <!-- 自动计算模式 -->
+    <view class="target-auto" wx:else>
+      <view class="target-value">{{dailyTarget}} <text class="target-unit">大卡</text></view>
+      <view class="target-detail">
+        <text>BMR: {{bmr}} kcal</text>
+        <text class="dot">·</text>
+        <text>TDEE: {{tdee}} kcal</text>
+      </view>
+      <view class="target-hint">根据下方身体数据自动计算</view>
     </view>
   </view>
 
@@ -90,9 +118,41 @@
     <button class="btn-primary save-btn" bindtap="saveProfile">保存设置</button>
   </view>
 
+  <!-- 记录提醒 -->
+  <view class="card reminder-card">
+    <view class="reminder-header">
+      <view class="reminder-title-wrap">
+        <text class="card-title" style="margin-bottom:0">🔔 记录提醒</text>
+        <text class="reminder-desc">到饭点提醒你记录</text>
+      </view>
+      <switch 
+        class="reminder-switch" 
+        checked="{{reminderEnabled}}" 
+        bindchange="toggleReminder"
+        color="#5E8B00"
+      />
+    </view>
+    <view class="reminder-times" wx:if="{{reminderEnabled}}">
+      <view 
+        class="reminder-time-item {{item.enabled ? 'active' : ''}}" 
+        wx:for="{{reminderTimes}}" 
+        wx:key="time"
+        bindtap="toggleReminderTime"
+        data-idx="{{index}}"
+      >
+        <text class="reminder-time-label">{{item.label}}</text>
+        <text class="reminder-time-value">{{item.time}}</text>
+        <view class="reminder-time-check">{{item.enabled ? '✓' : ''}}</view>
+      </view>
+    </view>
+  </view>
+
   <!-- 统计 -->
-  <view class="card stats-card">
-    <view class="card-title">记录统计</view>
+  <view class="card stats-card" bindtap="goToHistory">
+    <view class="stats-head">
+      <text class="card-title">记录统计</text>
+      <text class="stats-more">查看历史 ›</text>
+    </view>
     <view class="stats-row">
       <view class="stat-item">
         <text class="stat-num">{{totalDays}}</text>
@@ -105,6 +165,29 @@
       <view class="stat-item">
         <text class="stat-num">{{totalRecords}}</text>
         <text class="stat-label">总记录条数</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 成就系统 -->
+  <view class="card achievements-card" wx:if="{{achievements.length > 0}}">
+    <view class="card-title">🏅 成就徽章</view>
+    <view class="achievements-grid">
+      <view 
+        class="achievement-item {{item.unlocked ? 'unlocked' : 'locked'}}"
+        wx:for="{{achievements}}"
+        wx:key="title"
+        bindtap="onAchievementTap"
+        data-item="{{item}}"
+      >
+        <view class="achievement-icon-wrap">
+          <text class="achievement-icon">{{item.icon}}</text>
+          <!-- 进度环 -->
+          <view class="achievement-progress" wx:if="{{!item.unlocked}}">
+            <view class="achievement-progress-fill" style="background: conic-gradient(var(--lime-deep) {{item.progress * 360}}deg, var(--line) 0deg);"></view>
+          </view>
+        </view>
+        <text class="achievement-title">{{item.title}}</text>
       </view>
     </view>
   </view>

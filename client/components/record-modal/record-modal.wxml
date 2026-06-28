@@ -14,7 +14,7 @@
     <view class="portion-section" wx:if="{{!food.customKcal}}">
       <view class="portion-label">选择份量</view>
       
-      <!-- 快捷份量按钮 -->
+      <!-- 快捷份量按钮（可视化） -->
       <view class="portion-quick">
         <view 
           class="portion-btn {{selectedPortion === item.value ? 'active' : ''}}"
@@ -23,18 +23,21 @@
           bindtap="selectPortion"
           data-value="{{item.value}}"
           data-label="{{item.label}}"
-        >{{item.label}}</view>
+        >
+          <text class="portion-btn-label">{{item.label}}</text>
+          <text class="portion-btn-desc" wx:if="{{item.desc}}">{{item.desc}}</text>
+        </view>
       </view>
 
       <!-- 自定义克数 -->
       <view class="portion-custom">
-        <text class="custom-label">自定义:</text>
+        <text class="custom-label">精确输入:</text>
         <input 
           class="custom-input" 
           type="number" 
           value="{{customGrams}}" 
           bindinput="onCustomInput"
-          placeholder="输入克数"
+          placeholder="克数"
         />
         <text class="custom-suffix">克</text>
       </view>

@@ -52,7 +52,7 @@ Component({
       })
     },
 
-    // 初始化份量选项
+    // 初始化份量选项（生活化描述）
     initPortionOptions(food) {
       if (food.customKcal) {
         this.setData({
@@ -63,20 +63,17 @@ Component({
         return
       }
 
-      // 根据食物生成常用份量
-      let options = [
-        { label: '50g', value: 50 },
-        { label: '100g', value: 100 },
-        { label: '150g', value: 150 },
-        { label: '200g', value: 200 }
-      ]
-
-      // 如果食物有常用份量信息
+      // 如果食物有常用份量信息，直接使用
+      let options
       if (food.servings && food.servings.length > 0) {
         options = food.servings.map(s => ({
           label: s.label,
-          value: s.grams
+          value: s.grams,
+          desc: s.desc || ''
         }))
+      } else {
+        // 默认份量使用生活化描述
+        options = this.getVisualPortions(food)
       }
 
       const defaultPortion = options.length > 0 ? options[Math.min(1, options.length - 1)].value : 100
@@ -89,6 +86,66 @@ Component({
         totalKcal,
         estimatedKcal: totalKcal
       })
+    },
+
+    // 根据食物类型生成可视化份量描述
+    getVisualPortions(food) {
+      const category = food.category || ''
+      
+      // 主食类
+      if (category === 'staple' || /米饭|面|粥|馒头|包子|饺子/.test(food.name)) {
+        return [
+          { label: '小碗', value: 100, desc: '≈ 拳头大小' },
+          { label: '一碗', value: 200, desc: '≈ 普通碗' },
+          { label: '大碗', value: 300, desc: '≈ 满满一碗' }
+        ]
+      }
+      // 肉类
+      if (category === 'meat' || /肉|鸡|鱼|虾|蛋/.test(food.name)) {
+        return [
+          { label: '几块', value: 50, desc: '≈ 手心大' },
+          { label: '一份', value: 100, desc: '≈ 巴掌大' },
+          { label: '大份', value: 200, desc: '≈ 满满一盘' }
+        ]
+      }
+      // 蔬菜类
+      if (category === 'vegetable' || /菜|青|白|萝卜|黄瓜|番茄/.test(food.name)) {
+        return [
+          { label: '小份', value: 100, desc: '≈ 一小碟' },
+          { label: '一盘', value: 200, desc: '≈ 普通盘' },
+          { label: '大份', value: 300, desc: '≈ 满盘' }
+        ]
+      }
+      // 水果类
+      if (category === 'fruit' || /果|瓜|莓|蕉|橙|梨|桃/.test(food.name)) {
+        return [
+          { label: '几块', value: 100, desc: '≈ 拳头大' },
+          { label: '一个/份', value: 200, desc: '≈ 中等个' },
+          { label: '大份', value: 350, desc: '≈ 一大碗' }
+        ]
+      }
+      // 饮品
+      if (category === 'drink' || /奶|茶|咖啡|汁|水/.test(food.name)) {
+        return [
+          { label: '小杯', value: 200, desc: '≈ 250ml' },
+          { label: '中杯', value: 350, desc: '≈ 400ml' },
+          { label: '大杯', value: 500, desc: '≈ 600ml' }
+        ]
+      }
+      // 零食
+      if (category === 'snack' || /饼|薯|糖|巧克力|坚果/.test(food.name)) {
+        return [
+          { label: '几口', value: 30, desc: '≈ 一小把' },
+          { label: '一包', value: 60, desc: '≈ 正常包装' },
+          { label: '大包', value: 100, desc: '≈ 分享装' }
+        ]
+      }
+      // 通用默认
+      return [
+        { label: '少量', value: 50, desc: '≈ 小半碗' },
+        { label: '一份', value: 150, desc: '≈ 普通份' },
+        { label: '大份', value: 250, desc: '≈ 满满一份' }
+      ]
     },
 
     // 选择快捷份量

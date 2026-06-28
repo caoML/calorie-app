@@ -1,0 +1,49 @@
+<!-- 卡路里小怪兽 -->
+<view class="monster-wrap">
+  <!-- 怪兽图片区 -->
+  <view 
+    class="monster-body {{isEntering ? 'monster-enter' : 'monster-idle-' + stateName}} {{isAnimating ? 'monster-morph' : ''}} {{isTapped ? 'monster-tap' : ''}}" 
+    bindtap="onMonsterTap"
+  >
+    <!-- 怪兽主图：双层交叉淡入淡出 -->
+    <image 
+      class="monster-img {{imgSwitch ? 'fade-out' : 'fade-in'}}" 
+      src="{{monsterImageA}}" 
+      mode="aspectFit"
+    />
+    <image 
+      class="monster-img monster-img-b {{imgSwitch ? 'fade-in' : 'fade-out'}}" 
+      src="{{monsterImageB}}" 
+      mode="aspectFit"
+    />
+    <!-- 轻盈状态的光效 -->
+    <view class="monster-glow" wx:if="{{level <= 1}}"></view>
+    <!-- 超标时的警告粒子 -->
+    <view class="monster-particles" wx:if="{{level >= 5}}">
+      <view class="particle p1"></view>
+      <view class="particle p2"></view>
+      <view class="particle p3"></view>
+    </view>
+  </view>
+
+  <!-- 怪兽台词气泡 -->
+  <view class="monster-bubble {{showBubble ? 'bubble-show' : 'bubble-hide'}}">
+    <text class="bubble-text">{{quote}}</text>
+  </view>
+
+  <!-- 预算消耗进度 -->
+  <view class="monster-progress">
+    <view class="progress-bar-bg">
+      <view 
+        class="progress-bar-fill {{level >= 5 ? 'over' : ''}} {{level <= 2 ? 'safe' : ''}}" 
+        style="width: {{percent > 130 ? 100 : (percent * 100 / 130)}}%"
+      ></view>
+      <!-- 上限标记线 -->
+      <view class="progress-target-mark" style="left: {{100 * 100 / 130}}%"></view>
+    </view>
+    <view class="progress-label">
+      <text class="progress-text">{{percent}}%</text>
+      <text class="progress-desc">预算已用</text>
+    </view>
+  </view>
+</view>

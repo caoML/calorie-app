@@ -1,7 +1,7 @@
 App({
   globalData: {
     userInfo: null,
-    baseUrl: 'http://106.54.31.24:3000/api', // 服务器地址；正式上线需改为 https 域名（微信要求）
+    baseUrl: 'https://www.birdjs.ltd/api', // 正式域名（HTTPS），需在微信公众平台配置为 request 合法域名
     token: ''
   },
 

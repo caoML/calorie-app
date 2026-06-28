@@ -58,4 +58,24 @@ export class RecordController {
     );
     return { code: 0, data };
   }
+
+  // 餐次分布统计 + 周对比
+  @Get('meal-stats')
+  async getMealStats(
+    @CurrentUser('id') userId: number,
+    @Query('days') days?: string,
+  ) {
+    const data = await this.recordService.getMealStats(
+      userId,
+      days ? Number(days) : 7,
+    );
+    return { code: 0, data };
+  }
+
+  // 成就/里程碑数据
+  @Get('achievements')
+  async getAchievements(@CurrentUser('id') userId: number) {
+    const data = await this.recordService.getAchievements(userId);
+    return { code: 0, data };
+  }
 }

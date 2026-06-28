@@ -1,0 +1,361 @@
+/* 怪兽组件样式 - 动态版 */
+.monster-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16rpx 0;
+}
+
+/* ===== 怪兽主体 ===== */
+.monster-body {
+  position: relative;
+  width: 360rpx;
+  height: 360rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.monster-img {
+  width: 300rpx;
+  height: 300rpx;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  transition: opacity 0.45s ease-in-out, transform 0.45s ease-in-out;
+}
+
+.monster-img.fade-in {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.monster-img.fade-out {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.85);
+}
+
+.monster-img-b {
+  z-index: 1;
+}
+
+/* ===== 首次入场动画 ===== */
+.monster-enter {
+  animation: monster-drop-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes monster-drop-in {
+  0% {
+    transform: translateY(-200rpx) scale(0.3) rotate(-10deg);
+    opacity: 0;
+  }
+  40% {
+    transform: translateY(20rpx) scale(1.1) rotate(3deg);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(-10rpx) scale(0.95) rotate(-2deg);
+  }
+  80% {
+    transform: translateY(5rpx) scale(1.03) rotate(1deg);
+  }
+  100% {
+    transform: translateY(0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* ===== 档位切换变身动画 ===== */
+.monster-morph {
+  animation: morph 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes morph {
+  0% { transform: scale(1) rotate(0deg); }
+  20% { transform: scale(0.75) rotate(-3deg); opacity: 0.7; }
+  50% { transform: scale(1.15) rotate(2deg); opacity: 1; }
+  75% { transform: scale(0.95) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* ===== 点击反弹动画 ===== */
+.monster-tap {
+  animation: tap-bounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes tap-bounce {
+  0% { transform: scale(1); }
+  15% { transform: scale(0.85) rotate(-5deg); }
+  40% { transform: scale(1.15) rotate(3deg); }
+  60% { transform: scale(0.97) rotate(-1deg); }
+  80% { transform: scale(1.03); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* ===== 各档位待机动画 ===== */
+
+/* 档位 0 - 超级轻盈：悬浮 + 轻柔上下 */
+.monster-idle-lightest {
+  animation: idle-float 3s ease-in-out infinite;
+}
+
+@keyframes idle-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-12rpx) scale(1.02); }
+  60% { transform: translateY(-8rpx) scale(1.01); }
+}
+
+/* 档位 1 - 活力满满：轻弹跳 */
+.monster-idle-energetic {
+  animation: idle-bounce-soft 2.5s ease-in-out infinite;
+}
+
+@keyframes idle-bounce-soft {
+  0%, 100% { transform: translateY(0) scaleY(1) scaleX(1); }
+  25% { transform: translateY(-8rpx) scaleY(1.03) scaleX(0.98); }
+  50% { transform: translateY(0) scaleY(0.97) scaleX(1.02); }
+  75% { transform: translateY(-4rpx) scaleY(1.01) scaleX(0.99); }
+}
+
+/* 档位 2 - 状态不错：温和呼吸 */
+.monster-idle-good {
+  animation: idle-breathe 3.5s ease-in-out infinite;
+}
+
+@keyframes idle-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+/* 档位 3 - 平稳正常：微微左右晃 */
+.monster-idle-steady {
+  animation: idle-sway 4s ease-in-out infinite;
+}
+
+@keyframes idle-sway {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(2deg) scale(1.01); }
+  75% { transform: rotate(-2deg) scale(1.01); }
+}
+
+/* 档位 4 - 注意一下：紧张呼吸加快 + 微抖 */
+.monster-idle-cautious {
+  animation: idle-nervous 2s ease-in-out infinite;
+}
+
+@keyframes idle-nervous {
+  0%, 100% { transform: scale(1) translateX(0); }
+  20% { transform: scale(1.03) translateX(2rpx); }
+  40% { transform: scale(0.98) translateX(-2rpx); }
+  60% { transform: scale(1.02) translateX(1rpx); }
+  80% { transform: scale(0.99) translateX(-1rpx); }
+}
+
+/* 档位 5 - 快超了/刚超：明显颤抖 + 膨胀 */
+.monster-idle-tense {
+  animation: idle-tense 1.2s ease-in-out infinite;
+}
+
+@keyframes idle-tense {
+  0%, 100% { transform: scale(1.02) translateX(0) rotate(0deg); }
+  10% { transform: scale(1.04) translateX(3rpx) rotate(1deg); }
+  20% { transform: scale(1.01) translateX(-3rpx) rotate(-1deg); }
+  30% { transform: scale(1.05) translateX(2rpx) rotate(0.5deg); }
+  40% { transform: scale(1.02) translateX(-2rpx) rotate(-0.5deg); }
+  50% { transform: scale(1.06) translateX(3rpx) rotate(1deg); }
+  60% { transform: scale(1.03) translateX(-3rpx) rotate(-1deg); }
+  70% { transform: scale(1.05) translateX(2rpx) rotate(0.5deg); }
+  80% { transform: scale(1.02) translateX(-2rpx) rotate(-0.5deg); }
+  90% { transform: scale(1.04) translateX(1rpx) rotate(0.3deg); }
+}
+
+/* 档位 6 - 爆炸：剧烈抖动 + 不规则膨胀 */
+.monster-idle-exploding {
+  animation: idle-exploding 0.8s ease-in-out infinite;
+}
+
+@keyframes idle-exploding {
+  0%, 100% { transform: scale(1.05) rotate(0deg); }
+  10% { transform: scale(1.1) rotate(2deg) translateX(4rpx); }
+  20% { transform: scale(1.03) rotate(-3deg) translateX(-5rpx); }
+  30% { transform: scale(1.12) rotate(1deg) translateX(3rpx); }
+  40% { transform: scale(1.04) rotate(-2deg) translateX(-4rpx); }
+  50% { transform: scale(1.13) rotate(3deg) translateX(5rpx); }
+  60% { transform: scale(1.05) rotate(-1deg) translateX(-3rpx); }
+  70% { transform: scale(1.1) rotate(2deg) translateX(4rpx); }
+  80% { transform: scale(1.06) rotate(-2deg) translateX(-5rpx); }
+  90% { transform: scale(1.08) rotate(1deg) translateX(2rpx); }
+}
+
+
+/* ===== 轻盈光晕 ===== */
+.monster-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400rpx;
+  height: 400rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(198, 242, 78, 0.3) 0%, rgba(198, 242, 78, 0.1) 40%, transparent 70%);
+  animation: glow-pulse 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+}
+
+/* ===== 超标警告粒子 ===== */
+.monster-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: #FF6B5E;
+  opacity: 0;
+}
+
+.particle.p1 {
+  top: 15%;
+  left: 20%;
+  animation: particle-pop 2s ease-in-out infinite 0s;
+}
+
+.particle.p2 {
+  top: 10%;
+  right: 25%;
+  animation: particle-pop 2s ease-in-out infinite 0.6s;
+}
+
+.particle.p3 {
+  top: 25%;
+  left: 50%;
+  animation: particle-pop 2s ease-in-out infinite 1.2s;
+}
+
+@keyframes particle-pop {
+  0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
+  20% { opacity: 1; transform: translateY(-20rpx) scale(1); }
+  50% { opacity: 0.8; transform: translateY(-40rpx) scale(0.8); }
+  80% { opacity: 0; transform: translateY(-60rpx) scale(0.3); }
+}
+
+/* ===== 台词气泡动画 ===== */
+.monster-bubble {
+  margin-top: 12rpx;
+  padding: 12rpx 24rpx;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 20rpx;
+  max-width: 90%;
+  transition: all 0.3s ease;
+}
+
+.monster-bubble.bubble-show {
+  animation: bubble-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.monster-bubble.bubble-hide {
+  opacity: 0.7;
+  transform: scale(0.95);
+}
+
+@keyframes bubble-in {
+  0% { opacity: 0; transform: scale(0.5) translateY(10rpx); }
+  60% { opacity: 1; transform: scale(1.05) translateY(-2rpx); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.bubble-text {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.4;
+}
+
+/* ===== 进度条 ===== */
+.monster-progress {
+  width: 100%;
+  margin-top: 20rpx;
+  padding: 0 12rpx;
+}
+
+.progress-bar-bg {
+  position: relative;
+  width: 100%;
+  height: 12rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6rpx;
+  overflow: visible;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 6rpx;
+  background: linear-gradient(90deg, rgba(198, 242, 78, 0.5), rgba(198, 242, 78, 0.9));
+  transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 安全区（绿色高亮 + 呼吸光） */
+.progress-bar-fill.safe {
+  background: linear-gradient(90deg, #A8E600, #C6F24E);
+  box-shadow: 0 0 12rpx rgba(198, 242, 78, 0.5);
+  animation: bar-glow 2s ease-in-out infinite;
+}
+
+@keyframes bar-glow {
+  0%, 100% { box-shadow: 0 0 8rpx rgba(198, 242, 78, 0.4); }
+  50% { box-shadow: 0 0 18rpx rgba(198, 242, 78, 0.7); }
+}
+
+/* 超标（红色 + 闪烁） */
+.progress-bar-fill.over {
+  background: linear-gradient(90deg, #C6F24E 40%, #FF9500 65%, #FF6B5E);
+  animation: bar-warning 1.5s ease-in-out infinite;
+}
+
+@keyframes bar-warning {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+/* 上限标记线 */
+.progress-target-mark {
+  position: absolute;
+  top: -4rpx;
+  width: 3rpx;
+  height: 20rpx;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 2rpx;
+  transform: translateX(-50%);
+}
+
+/* 进度文字 */
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10rpx;
+}
+
+.progress-text {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.9);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-desc {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.45);
+}

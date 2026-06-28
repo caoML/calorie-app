@@ -45,15 +45,20 @@ page {
 
 /* 主按钮：lime 底 + 墨绿字，胶囊 */
 .btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: var(--lime);
   color: var(--forest);
   border-radius: 999rpx;
   font-size: 30rpx;
   font-weight: 700;
+  line-height: 1;
   padding: 22rpx 40rpx;
   border: none;
   text-align: center;
   letter-spacing: 1rpx;
+  box-sizing: border-box;
 }
 
 .btn-primary::after {

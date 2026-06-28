@@ -194,6 +194,29 @@
     </view>
   </view>
 
+  <!-- 智能时段推荐 -->
+  <view class="smart-section" wx:if="{{!keyword && smartRecommends.length > 0}}">
+    <view class="section-title">{{mealTimeLabel}}</view>
+    <view class="smart-list">
+      <view 
+        class="smart-item" 
+        wx:for="{{smartRecommends}}" 
+        wx:key="id"
+        bindtap="onRecommendTap"
+        data-food="{{item}}"
+      >
+        <view class="smart-info">
+          <text class="smart-name">{{item.name}}</text>
+          <text class="smart-freq">吃过{{item.useCount || item.count || ''}}次</text>
+        </view>
+        <view class="smart-kcal">
+          <text class="smart-kcal-num">{{item.lastKcal || item.kcalPer100g}}</text>
+          <text class="smart-kcal-unit">大卡</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
   <!-- 热门食物分类 -->
   <view class="hot-section" wx:if="{{!keyword}}">
     <view class="section-title">🔥 常见食物</view>
@@ -223,6 +246,35 @@
           <text class="result-kcal-unit">大卡/100g</text>
         </view>
       </view>
+    </view>
+  </view>
+
+  <!-- 组合模式切换按钮 -->
+  <view class="combo-toggle {{comboMode ? 'active' : ''}}" bindtap="toggleComboMode">
+    <text class="combo-toggle-icon">{{comboMode ? '📋' : '➕'}}</text>
+    <text class="combo-toggle-text">{{comboMode ? '组合模式' : '多个一起记'}}</text>
+  </view>
+
+  <!-- 组合模式 - 本餐清单悬浮栏 -->
+  <view class="combo-panel" wx:if="{{comboMode && comboList.length > 0}}">
+    <view class="combo-panel-header">
+      <text class="combo-panel-title">🍽️ 本餐清单 ({{comboList.length}}项)</text>
+      <text class="combo-panel-clear" bindtap="clearComboList">清空</text>
+    </view>
+    <scroll-view scroll-y class="combo-scroll" style="max-height: 300rpx;">
+      <view class="combo-item" wx:for="{{comboList}}" wx:key="id">
+        <text class="combo-item-name">{{item.foodName}}</text>
+        <text class="combo-item-kcal">{{item.kcal}}大卡</text>
+        <view class="combo-item-del" bindtap="removeComboItem" data-id="{{item.id}}">✕</view>
+      </view>
+    </scroll-view>
+    <view class="combo-panel-footer">
+      <view class="combo-total">
+        <text class="combo-total-label">合计</text>
+        <text class="combo-total-num">{{comboTotalKcal}}</text>
+        <text class="combo-total-unit">大卡</text>
+      </view>
+      <view class="combo-submit-btn" bindtap="submitComboList">一键记录</view>
     </view>
   </view>
 

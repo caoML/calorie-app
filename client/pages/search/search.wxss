@@ -508,20 +508,90 @@
 }
 
 .manual-save-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 96rpx;
-  line-height: 96rpx;
+  line-height: 1;
   background: #C6F24E;
   color: #1C2620;
   border-radius: 999rpx;
   font-size: 32rpx;
   font-weight: 800;
   border: none;
+  box-sizing: border-box;
   box-shadow: 0 10rpx 26rpx rgba(198, 242, 78, 0.4);
 }
 
 .manual-save-btn::after {
   border: none;
+}
+
+/* ===== 智能时段推荐 ===== */
+.smart-section {
+  margin-bottom: 32rpx;
+}
+
+.smart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.smart-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  padding: 24rpx 28rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid var(--line);
+  box-shadow: 0 4rpx 16rpx rgba(25, 33, 27, 0.03);
+}
+
+.smart-item:active {
+  background: var(--lime-soft);
+  border-color: rgba(94, 139, 0, 0.2);
+}
+
+.smart-info {
+  flex: 1;
+}
+
+.smart-name {
+  font-size: 30rpx;
+  color: var(--ink);
+  font-weight: 600;
+  display: block;
+}
+
+.smart-freq {
+  font-size: 22rpx;
+  color: var(--ink-3);
+  margin-top: 4rpx;
+  display: block;
+}
+
+.smart-kcal {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.smart-kcal-num {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1rpx;
+}
+
+.smart-kcal-unit {
+  font-size: 20rpx;
+  color: var(--ink-3);
+  margin-top: 2rpx;
 }
 
 /* ===== 热门分类 ===== */
@@ -558,4 +628,157 @@
   color: var(--lime);
   border-color: var(--forest);
   font-weight: 600;
+}
+
+/* ===== 组合记录模式 ===== */
+.combo-toggle {
+  position: fixed;
+  right: 32rpx;
+  bottom: calc(32rpx + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 20rpx 28rpx;
+  background: var(--surface);
+  border-radius: 999rpx;
+  box-shadow: 0 8rpx 30rpx rgba(25, 33, 27, 0.12);
+  border: 2rpx solid var(--line);
+  z-index: 500;
+  transition: all 0.2s;
+}
+
+.combo-toggle.active {
+  background: #1C2620;
+  border-color: #1C2620;
+}
+
+.combo-toggle-icon {
+  font-size: 28rpx;
+}
+
+.combo-toggle-text {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.combo-toggle.active .combo-toggle-text {
+  color: var(--lime);
+}
+
+/* 本餐清单面板 */
+.combo-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #FBFAF5;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 28rpx 28rpx calc(28rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -8rpx 40rpx rgba(25, 33, 27, 0.12);
+  z-index: 600;
+  animation: slideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.combo-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.combo-panel-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.combo-panel-clear {
+  font-size: 24rpx;
+  color: var(--coral, #FF4D4F);
+  font-weight: 600;
+  padding: 8rpx 16rpx;
+}
+
+.combo-scroll {
+  margin-bottom: 16rpx;
+}
+
+.combo-item {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid var(--line);
+}
+
+.combo-item-name {
+  flex: 1;
+  font-size: 28rpx;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.combo-item-kcal {
+  font-size: 26rpx;
+  color: var(--ink-2);
+  font-weight: 700;
+  margin-right: 20rpx;
+  font-variant-numeric: tabular-nums;
+}
+
+.combo-item-del {
+  width: 44rpx;
+  height: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  color: #9CA298;
+  background: #EFEDE5;
+  border-radius: 50%;
+}
+
+.combo-panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8rpx;
+}
+
+.combo-total {
+  display: flex;
+  align-items: baseline;
+  gap: 6rpx;
+}
+
+.combo-total-label {
+  font-size: 24rpx;
+  color: var(--ink-3);
+}
+
+.combo-total-num {
+  font-size: 40rpx;
+  font-weight: 900;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1rpx;
+}
+
+.combo-total-unit {
+  font-size: 22rpx;
+  color: var(--ink-3);
+}
+
+.combo-submit-btn {
+  padding: 22rpx 48rpx;
+  background: #C6F24E;
+  color: #1C2620;
+  border-radius: 999rpx;
+  font-size: 30rpx;
+  font-weight: 800;
+  box-shadow: 0 8rpx 24rpx rgba(198, 242, 78, 0.35);
+}
+
+.combo-submit-btn:active {
+  transform: scale(0.95);
 }

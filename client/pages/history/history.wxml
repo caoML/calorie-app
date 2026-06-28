@@ -1,0 +1,158 @@
+<!-- 历史记录页 -->
+<view class="page-history">
+  <!-- 区间切换 -->
+  <view class="range-tabs">
+    <view
+      class="range-tab {{days === item.days ? 'active' : ''}}"
+      wx:for="{{rangeOptions}}"
+      wx:key="days"
+      bindtap="onRangeChange"
+      data-days="{{item.days}}"
+    >{{item.label}}</view>
+  </view>
+
+  <!-- 区间总览 -->
+  <view class="summary-card">
+    <view class="summary-item">
+      <text class="summary-num">{{summary.avg}}</text>
+      <text class="summary-label">日均摄入(大卡)</text>
+    </view>
+    <view class="summary-divider"></view>
+    <view class="summary-item">
+      <text class="summary-num">{{summary.days}}</text>
+      <text class="summary-label">记录天数</text>
+    </view>
+    <view class="summary-divider"></view>
+    <view class="summary-item">
+      <text class="summary-num">{{summary.total}}</text>
+      <text class="summary-label">累计摄入(大卡)</text>
+    </view>
+  </view>
+
+  <!-- 摄入趋势图 -->
+  <view class="chart-card" wx:if="{{chart.length > 0}}">
+    <view class="chart-head">
+      <text class="chart-title">摄入趋势</text>
+      <text class="chart-sel" wx:if="{{selectedBar}}">
+        {{selectedBar.md}} ·
+        <text class="chart-sel-kcal {{selectedBar.over ? 'over' : ''}}">{{selectedBar.total}}</text> 大卡
+      </text>
+    </view>
+    <view class="chart-plot">
+      <scroll-view scroll-x class="chart-scroll" scroll-into-view="bar-{{selectedDate}}" scroll-with-animation>
+        <view class="chart-bars">
+          <!-- 目标参考线 -->
+          <view class="chart-target-line" style="bottom: {{targetBottom}}rpx">
+            <text class="chart-target-label">目标 {{dailyTarget}}</text>
+          </view>
+          <view
+            class="chart-bar-wrap"
+            wx:for="{{chart}}"
+            wx:key="date"
+            id="bar-{{item.date}}"
+            bindtap="onSelectBar"
+            data-date="{{item.date}}"
+          >
+            <view class="chart-bar-area">
+              <view
+                class="chart-bar {{item.over ? 'over' : ''}} {{selectedDate === item.date ? 'active' : ''}}"
+                style="height: {{item.barH}}rpx"
+              ></view>
+            </view>
+            <text class="chart-bar-label {{item.isToday ? 'today' : ''}} {{selectedDate === item.date ? 'sel' : ''}}">{{item.d}}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 餐次分布 -->
+  <view class="card meal-stats-card" wx:if="{{mealStats.length > 0}}">
+    <view class="meal-stats-head">
+      <text class="chart-title">餐次分布</text>
+      <text class="meal-stats-period">近{{days}}天</text>
+    </view>
+    <view class="meal-bars">
+      <view class="meal-bar-row" wx:for="{{mealStats}}" wx:key="meal">
+        <text class="meal-bar-name">{{item.name}}</text>
+        <view class="meal-bar-track">
+          <view class="meal-bar-fill" style="width: {{item.percent}}%; background: {{item.color}};"></view>
+        </view>
+        <text class="meal-bar-val">{{item.total}}<text class="meal-bar-unit">大卡</text></text>
+        <text class="meal-bar-pct">{{item.percent}}%</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 周对比 -->
+  <view class="card week-compare-card" wx:if="{{weekCompare}}">
+    <view class="week-compare-head">
+      <text class="chart-title">本周 vs 上周</text>
+      <text class="week-compare-hint">按有记录天数计算</text>
+    </view>
+    <view class="week-compare-row">
+      <view class="week-col">
+        <text class="week-label">本周日均</text>
+        <text class="week-num">{{weekCompare.thisWeekAvg}}</text>
+        <text class="week-unit">大卡</text>
+      </view>
+      <view class="week-vs">
+        <text class="week-diff {{weekCompare.diff > 0 ? 'up' : weekCompare.diff < 0 ? 'down' : ''}}">
+          {{weekCompare.diff > 0 ? '+' : ''}}{{weekCompare.diff}}
+        </text>
+        <text class="week-diff-label">大卡/天</text>
+      </view>
+      <view class="week-col">
+        <text class="week-label">上周日均</text>
+        <text class="week-num">{{weekCompare.lastWeekAvg}}</text>
+        <text class="week-unit">大卡</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 每日列表 -->
+  <view class="day-list" wx:if="{{list.length > 0}}">
+    <view class="day-block" wx:for="{{list}}" wx:key="date">
+      <!-- 当天汇总行 -->
+      <view class="day-row" bindtap="onToggleDay" data-date="{{item.date}}">
+        <view class="day-date">
+          <text class="day-md">{{item.md}}</text>
+          <text class="day-week {{item.isToday ? 'today' : ''}}">{{item.isToday ? '今天' : item.week}}</text>
+        </view>
+        <view class="day-main">
+          <view class="day-kcal-row">
+            <text class="day-kcal {{item.over ? 'over' : ''}}">{{item.total}}</text>
+            <text class="day-kcal-unit">大卡 · {{item.count}}条</text>
+            <text class="day-arrow {{expandedDate === item.date ? 'up' : ''}}">⌄</text>
+          </view>
+          <view class="day-bar">
+            <view class="day-bar-fill {{item.over ? 'over' : ''}}" style="width: {{item.barWidth}}%"></view>
+          </view>
+          <text class="day-percent">目标占比 {{item.percent}}%</text>
+        </view>
+      </view>
+
+      <!-- 当天明细（展开） -->
+      <view class="day-detail" wx:if="{{expandedDate === item.date && detailMap[item.date]}}">
+        <view class="meal-group" wx:for="{{detailMap[item.date].meals}}" wx:for-item="meal" wx:key="meal">
+          <view class="meal-head">
+            <text class="meal-name">{{meal.name}}</text>
+            <text class="meal-total">{{meal.total}} 大卡</text>
+          </view>
+          <view class="meal-item" wx:for="{{meal.items}}" wx:for-item="rec" wx:key="id">
+            <text class="meal-food">{{rec.foodName}}</text>
+            <text class="meal-amount">{{rec.amount}}{{rec.unit}}</text>
+            <text class="meal-item-kcal">{{rec.kcal}}大卡</text>
+          </view>
+        </view>
+        <view class="detail-empty" wx:if="{{detailMap[item.date].meals.length === 0}}">当天暂无明细</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{!loading && list.length === 0}}">
+    <text class="empty-icon">🗒️</text>
+    <text class="empty-text">这段时间还没有记录哦</text>
+  </view>
+</view>

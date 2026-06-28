@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Post, Body, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { CurrentUser } from '../../common/decorators/user.decorator';
@@ -23,6 +23,23 @@ export class UserController {
   @Get('stats')
   async getStats(@CurrentUser('id') userId: number) {
     const data = await this.userService.getStats(userId);
+    return { code: 0, data };
+  }
+
+  // 获取提醒设置
+  @Get('reminder')
+  async getReminder(@CurrentUser('id') userId: number) {
+    const data = await this.userService.getReminder(userId);
+    return { code: 0, data };
+  }
+
+  // 更新提醒设置
+  @Put('reminder')
+  async updateReminder(
+    @CurrentUser('id') userId: number,
+    @Body() body: { enabled: boolean; times: string[] },
+  ) {
+    const data = await this.userService.updateReminder(userId, body);
     return { code: 0, data };
   }
 }

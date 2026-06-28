@@ -2,6 +2,7 @@
   "usingComponents": {
     "food-card": "../../components/food-card/food-card",
     "record-modal": "../../components/record-modal/record-modal",
-    "progress-ring": "../../components/progress-ring/progress-ring"
+    "progress-ring": "../../components/progress-ring/progress-ring",
+    "monster": "../../components/monster/monster"
   }
 }
