@@ -14,7 +14,7 @@
     <view class="portion-section" wx:if="{{!food.customKcal}}">
       <view class="portion-label">选择份量</view>
       
-      <!-- 快捷份量按钮（可视化） -->
+      <!-- 快捷份量按钮（显示热量） -->
       <view class="portion-quick">
         <view 
           class="portion-btn {{selectedPortion === item.value ? 'active' : ''}}"
@@ -25,21 +25,23 @@
           data-label="{{item.label}}"
         >
           <text class="portion-btn-label">{{item.label}}</text>
-          <text class="portion-btn-desc" wx:if="{{item.desc}}">{{item.desc}}</text>
+          <text class="portion-btn-grams">{{item.value}}g</text>
+          <text class="portion-btn-kcal">{{item.kcal}}大卡</text>
         </view>
       </view>
 
       <!-- 自定义克数 -->
-      <view class="portion-custom">
-        <text class="custom-label">精确输入:</text>
+      <view class="portion-custom {{customGrams ? 'has-value' : ''}}">
+        <text class="custom-label">自定义</text>
         <input 
           class="custom-input" 
           type="number" 
           value="{{customGrams}}" 
           bindinput="onCustomInput"
-          placeholder="克数"
+          placeholder="输入克数"
         />
         <text class="custom-suffix">克</text>
+        <text class="custom-kcal" wx:if="{{customGrams}}">≈ {{customKcal}}大卡</text>
       </view>
     </view>
 
@@ -115,16 +117,26 @@
       </view>
     </view>
 
-    <!-- 预估热量 -->
-    <view class="estimate-section">
-      <view class="estimate-left">
-        <text class="estimate-label">你的实际摄入</text>
-        <text class="estimate-note" wx:if="{{sharePeople > 1}}">总{{totalKcal}}大卡 ÷ {{shareText}}</text>
+    <!-- 预估热量卡片 -->
+    <view class="estimate-card">
+      <view class="estimate-card-top">
+        <view class="estimate-info">
+          <text class="estimate-label">本次摄入</text>
+          <text class="estimate-detail" wx:if="{{sharePeople <= 1}}">
+            {{customGrams ? customGrams : selectedPortion}}g · {{food.kcalPer100g}}大卡/100g
+          </text>
+          <text class="estimate-detail" wx:if="{{sharePeople > 1}}">
+            总{{totalKcal}}大卡 · {{shareText}}
+          </text>
+        </view>
+        <view class="estimate-kcal-block">
+          <text class="estimate-num">{{estimatedKcal}}</text>
+          <text class="estimate-unit">大卡</text>
+        </view>
       </view>
-      <text class="estimate-value">≈ {{estimatedKcal}} 大卡</text>
     </view>
 
-    <!-- 确认按钮 -->
-    <button class="confirm-btn" bindtap="onConfirm">✓ 记录</button>
+    <!-- 确认按钮（显示热量） -->
+    <button class="confirm-btn" bindtap="onConfirm">记录 {{estimatedKcal}} 大卡 → {{selectedMealName}}</button>
   </view>
 </view>

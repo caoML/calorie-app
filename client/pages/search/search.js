@@ -147,12 +147,16 @@ Page({
         const userResults = allResults.filter(f => f.isUserFood)
         const systemResults = allResults.filter(f => !f.isUserFood)
 
+        // 判断是否有精确匹配（结果中有和关键词完全一样的食物名）
+        const hasExactMatch = allResults.some(f => f.name === keyword)
+
         this.setData({
           results: allResults,
           userResults,
           systemResults,
           suggestions: res.suggestions || [],
-          searched: true
+          searched: true,
+          hasExactMatch
         })
       }
     } catch (e) {
@@ -176,6 +180,7 @@ Page({
       systemResults: [],
       suggestions: [],
       searched: false,
+      hasExactMatch: false,
       isKjInput: false,
       aiResult: null,
       aiLoading: false
@@ -239,31 +244,32 @@ Page({
     const aiResult = this.data.aiResult
     if (!aiResult) return
 
-    // 先保存到私人库，再打开记录弹窗
-    this.saveAiResultAndRecord(aiResult)
+    // 立即弹框，不等网络请求
+    this.setData({
+      selectedFood: {
+        ...aiResult,
+        isUserFood: true,
+        source: 'ai'
+      },
+      showRecordModal: true
+    })
+
+    // 后台静默保存到私人库（不阻塞用户操作）
+    this.saveAiResultToLibrary(aiResult)
   },
 
-  async saveAiResultAndRecord(aiResult) {
+  async saveAiResultToLibrary(aiResult) {
     try {
       const res = await request('/ai-estimate/save', 'POST', { foodName: aiResult.name })
       if (res.code === 0) {
+        // 保存成功，更新 selectedFood 为服务端返回的完整数据
         const food = res.data
         food.servings = aiResult.servings
-        this.setData({
-          selectedFood: food,
-          showRecordModal: true
-        })
+        this.setData({ selectedFood: food })
       }
     } catch (err) {
-      // 降级：直接用估算结果记录
-      this.setData({
-        selectedFood: {
-          ...aiResult,
-          isUserFood: true,
-          source: 'ai'
-        },
-        showRecordModal: true
-      })
+      // 保存失败也不影响，已经用本地数据弹框了
+      console.warn('AI result save to library failed:', err)
     }
   },
 

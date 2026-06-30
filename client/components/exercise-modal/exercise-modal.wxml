@@ -1,0 +1,216 @@
+<!-- 运动记录弹窗 -->
+<view class="modal-mask" wx:if="{{show}}" catchtap="onClose">
+  <view class="modal-content" catchtap="noop">
+    <!-- 标题 -->
+    <view class="modal-header">
+      <text class="modal-title">🏃 记录运动</text>
+      <view class="modal-close" bindtap="onClose">✕</view>
+    </view>
+
+    <!-- Tab 切换：预设 / 自定义 -->
+    <view class="tab-row">
+      <view class="tab-item {{activeTab === 'preset' ? 'active' : ''}}" bindtap="switchTab" data-tab="preset">
+        <text>快捷选择</text>
+      </view>
+      <view class="tab-item {{activeTab === 'custom' ? 'active' : ''}}" bindtap="switchTab" data-tab="custom">
+        <text>自定义运动</text>
+      </view>
+    </view>
+
+    <!-- ======= 预设运动 Tab ======= -->
+    <view class="tab-content" wx:if="{{activeTab === 'preset'}}">
+      <!-- 运动类型选择 -->
+      <view class="exercise-section">
+        <text class="section-label">选择运动</text>
+        <view class="exercise-grid">
+          <view 
+            class="exercise-type {{selectedType === item.key ? 'active' : ''}}"
+            wx:for="{{exerciseTypes}}"
+            wx:key="key"
+            bindtap="onSelectType"
+            data-item="{{item}}"
+          >
+            <text class="type-icon">{{item.icon}}</text>
+            <text class="type-name">{{item.name}}</text>
+            <text class="type-cal">{{item.calPerMin}}卡/分钟</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 时长输入 -->
+      <view class="duration-section" wx:if="{{selectedType}}">
+        <text class="section-label">运动时长</text>
+        <view class="duration-input-wrap">
+          <view class="duration-shortcuts">
+            <view 
+              class="shortcut-btn {{duration === item ? 'active' : ''}}"
+              wx:for="{{[15, 30, 45, 60, 90]}}"
+              wx:key="*this"
+              bindtap="onSelectDuration"
+              data-duration="{{item}}"
+            >{{item}}分钟</view>
+          </view>
+          <view class="custom-duration">
+            <text class="custom-label">自定义：</text>
+            <input 
+              class="duration-input" 
+              type="digit" 
+              value="{{duration}}" 
+              bindinput="onDurationInput"
+              placeholder="分钟"
+            />
+            <text class="duration-unit">分钟</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 预估消耗 -->
+      <view class="estimate-section" wx:if="{{selectedType && duration > 0}}">
+        <view class="estimate-card">
+          <view class="estimate-left">
+            <text class="estimate-icon">🔥</text>
+            <text class="estimate-label">预估消耗</text>
+          </view>
+          <view class="estimate-right">
+            <text class="estimate-value">{{estimatedKcal}}</text>
+            <text class="estimate-unit">大卡</text>
+          </view>
+        </view>
+        <view class="adjust-row">
+          <text class="adjust-label">手动调整：</text>
+          <input 
+            class="adjust-input" 
+            type="digit" 
+            value="{{customKcal}}" 
+            bindinput="onKcalInput"
+            placeholder="{{estimatedKcal}}"
+          />
+          <text class="adjust-unit">大卡</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- ======= 自定义运动 Tab ======= -->
+    <view class="tab-content" wx:if="{{activeTab === 'custom'}}">
+      <!-- 运动描述输入 -->
+      <view class="custom-section">
+        <text class="section-label">描述你的运动</text>
+        <view class="custom-input-wrap">
+          <input 
+            class="custom-name-input"
+            value="{{customExerciseName}}"
+            bindinput="onCustomNameInput"
+            placeholder="如：爬楼梯、做家务、遛狗、打羽毛球..."
+            maxlength="30"
+          />
+        </view>
+      </view>
+
+      <!-- 时长输入 -->
+      <view class="duration-section">
+        <text class="section-label">运动时长</text>
+        <view class="duration-input-wrap">
+          <view class="duration-shortcuts">
+            <view 
+              class="shortcut-btn {{duration === item ? 'active' : ''}}"
+              wx:for="{{[15, 30, 45, 60, 90]}}"
+              wx:key="*this"
+              bindtap="onSelectDuration"
+              data-duration="{{item}}"
+            >{{item}}分钟</view>
+          </view>
+          <view class="custom-duration">
+            <text class="custom-label">自定义：</text>
+            <input 
+              class="duration-input" 
+              type="digit" 
+              value="{{duration}}" 
+              bindinput="onDurationInput"
+              placeholder="分钟"
+            />
+            <text class="duration-unit">分钟</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- AI 估算按钮 -->
+      <view class="ai-estimate-section" wx:if="{{customExerciseName && duration > 0}}">
+        <button 
+          class="ai-estimate-btn {{aiLoading ? 'loading' : ''}}" 
+          bindtap="onAiEstimate"
+          disabled="{{aiLoading}}"
+        >
+          <text class="ai-btn-icon">{{aiLoading ? '⏳' : '🤖'}}</text>
+          <text class="ai-btn-text">{{aiLoading ? 'AI 估算中...' : 'AI 智能估算热量'}}</text>
+        </button>
+      </view>
+
+      <!-- AI 估算结果 -->
+      <view class="ai-result-section" wx:if="{{aiResult}}">
+        <view class="ai-result-card">
+          <view class="ai-result-header">
+            <text class="ai-result-title">🤖 AI 估算结果</text>
+            <text class="ai-result-confidence {{aiResult.confidence}}">
+              {{aiResult.confidence === 'high' ? '高可信度' : aiResult.confidence === 'medium' ? '中可信度' : '低可信度'}}
+            </text>
+          </view>
+          <view class="ai-result-body">
+            <view class="ai-result-main">
+              <text class="ai-result-name">{{aiResult.exerciseName}}</text>
+              <view class="ai-result-kcal-wrap">
+                <text class="ai-result-kcal">{{aiResult.kcalBurned}}</text>
+                <text class="ai-result-kcal-unit">大卡</text>
+              </view>
+            </view>
+            <view class="ai-result-meta">
+              <text class="ai-result-intensity">强度：{{aiResult.intensity === 'high' ? '高' : aiResult.intensity === 'medium' ? '中' : '低'}}</text>
+              <text class="ai-result-duration">{{duration}}分钟</text>
+            </view>
+            <text class="ai-result-tip" wx:if="{{aiResult.tip}}">💡 {{aiResult.tip}}</text>
+          </view>
+        </view>
+
+        <!-- 手动调整 -->
+        <view class="adjust-row">
+          <text class="adjust-label">手动调整：</text>
+          <input 
+            class="adjust-input" 
+            type="digit" 
+            value="{{customKcal}}" 
+            bindinput="onKcalInput"
+            placeholder="{{aiResult.kcalBurned}}"
+          />
+          <text class="adjust-unit">大卡</text>
+        </view>
+      </view>
+
+      <!-- 无 AI 时手动输入热量 -->
+      <view class="manual-kcal-section" wx:if="{{!aiResult && customExerciseName && duration > 0}}">
+        <view class="manual-kcal-row">
+          <text class="section-label">或直接输入热量</text>
+          <view class="manual-kcal-input-wrap">
+            <input 
+              class="manual-kcal-input" 
+              type="digit" 
+              value="{{customKcal}}" 
+              bindinput="onKcalInput"
+              placeholder="输入消耗的大卡数"
+            />
+            <text class="manual-kcal-unit">大卡</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 确认按钮 -->
+    <view class="modal-footer">
+      <button 
+        class="confirm-btn {{!canConfirm ? 'disabled' : ''}}" 
+        bindtap="onConfirm"
+        disabled="{{!canConfirm}}"
+      >
+        确认记录 {{finalKcal > 0 ? '(-' + finalKcal + '大卡)' : ''}}
+      </button>
+    </view>
+  </view>
+</view>

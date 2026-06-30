@@ -18,45 +18,91 @@
       </view>
     </view>
 
-    <!-- 怪兽主体 -->
+    <!-- 怪兽主体（使用净摄入驱动状态） -->
     <monster 
-      current="{{todayTotal}}" 
+      current="{{netIntake > 0 ? netIntake : todayTotal}}" 
       target="{{dailyTarget}}"
       bind:tap="onMonsterTap"
       bind:levelchange="onMonsterLevelChange"
     />
-
-    <!-- 飞数动效 -->
-    <view 
-      class="fly-number {{item.animating ? 'fly-up' : ''}}" 
-      wx:for="{{flyNumbers}}" 
-      wx:key="id"
-    >{{item.kcal}} 大卡</view>
 
     <!-- 底部数据栏 -->
     <view class="summary-stats">
       <view class="summary-consumed">
         <text class="stats-number">{{todayTotal}}</text>
         <text class="stats-label">已摄入</text>
+        <!-- 摄入飞数动效（飞到已摄入数字上） -->
+        <view 
+          class="fly-number fly-intake {{item.animating ? 'fly-up' : ''}}" 
+          wx:for="{{flyNumbers}}" 
+          wx:key="id"
+          wx:if="{{!item.isExercise}}"
+        >{{item.kcal}} 大卡</view>
       </view>
       <view class="summary-divider"></view>
-      <view class="summary-target-info">
+      <view class="summary-exercise" wx:if="{{exerciseBurned > 0}}" bindtap="toggleExerciseDetail">
+        <text class="stats-number exercise-num">-{{exerciseBurned}}</text>
+        <text class="stats-label">运动消耗 {{showExerciseDetail ? '▲' : '▼'}}</text>
+        <!-- 运动飞数动效（飞到运动消耗数字上） -->
+        <view 
+          class="fly-number fly-exercise {{item.animating ? 'fly-up' : ''}}" 
+          wx:for="{{flyNumbers}}" 
+          wx:key="id"
+          wx:if="{{item.isExercise}}"
+        >{{item.kcal}} 大卡</view>
+      </view>
+      <view class="summary-divider" wx:if="{{exerciseBurned > 0}}"></view>
+      <view class="summary-target-info" wx:if="{{exerciseBurned <= 0}}">
         <text class="stats-number target-num">{{dailyTarget}}</text>
         <text class="stats-label">预算上限</text>
       </view>
-      <view class="summary-divider"></view>
+      <view class="summary-divider" wx:if="{{exerciseBurned <= 0}}"></view>
       <view class="summary-remaining">
         <text class="stats-number {{remaining < 0 ? 'over' : ''}}">{{remaining < 0 ? '+' : ''}}{{remaining < 0 ? -remaining : remaining}}</text>
         <text class="stats-label">{{remaining >= 0 ? '剩余' : '超出'}}</text>
       </view>
     </view>
+
+    <!-- 运动明细（收在卡片内，点击运动消耗展开） -->
+    <view class="exercise-detail-panel" wx:if="{{showExerciseDetail && exerciseRecords.length > 0}}">
+      <view 
+        class="exercise-detail-item" 
+        wx:for="{{exerciseRecords}}" 
+        wx:key="id"
+        bindlongpress="onExerciseLongPress"
+        data-record="{{item}}"
+      >
+        <text class="exercise-detail-icon">{{item.icon}}</text>
+        <text class="exercise-detail-name">{{item.exerciseName}}</text>
+        <text class="exercise-detail-duration">{{item.duration}}分钟</text>
+        <text class="exercise-detail-kcal">-{{item.kcalBurned}}大卡</text>
+      </view>
+    </view>
   </view>
 
-  <!-- 搜索/输入入口 -->
-  <view class="card search-card" bindtap="goToSearch">
-    <view class="search-icon">🔍</view>
-    <text class="search-placeholder">搜索食物 / 输入能量(kJ)...</text>
+  <!-- 核心操作入口 -->
+  <view class="action-row">
+    <view class="action-btn food-btn" bindtap="goToSearch">
+      <view class="action-btn-icon-wrap food-icon-wrap">
+        <text class="action-btn-icon">🍽️</text>
+      </view>
+      <view class="action-btn-text-wrap">
+        <text class="action-btn-title">记录饮食</text>
+        <text class="action-btn-desc">搜索</text>
+      </view>
+    </view>
+    <view class="action-btn exercise-btn" bindtap="openExerciseModal">
+      <view class="action-btn-icon-wrap exercise-icon-wrap">
+        <text class="action-btn-icon">🏃</text>
+      </view>
+      <view class="action-btn-text-wrap">
+        <text class="action-btn-title">记录运动</text>
+        <text class="action-btn-desc">AI 估算消耗</text>
+      </view>
+    </view>
   </view>
+
+
 
   <!-- ⚡ 快捷记录区 -->
   <view class="section quick-section">
@@ -201,5 +247,12 @@
     food="{{selectedFood}}"
     bind:confirm="onRecordConfirm"
     bind:close="onRecordModalClose"
+  />
+
+  <!-- 运动记录弹窗 -->
+  <exercise-modal
+    show="{{showExerciseModal}}"
+    bind:confirm="onExerciseConfirm"
+    bind:close="onExerciseModalClose"
   />
 </view>

@@ -1,7 +1,8 @@
 App({
   globalData: {
     userInfo: null,
-    baseUrl: 'https://www.birdjs.ltd/api', // 正式域名（HTTPS），需在微信公众平台配置为 request 合法域名
+    // baseUrl: 'https://www.birdjs.ltd/api', // 正式域名（HTTPS），需在微信公众平台配置为 request 合法域名
+    baseUrl: 'http://localhost:3000/api', // 临时使用本地地址调试
     token: ''
   },
 

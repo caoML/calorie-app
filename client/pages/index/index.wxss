@@ -184,19 +184,36 @@
 }
 
 /* ===== 飞数动效 ===== */
+/* 数据栏容器需要相对定位，让飞数定位在其内部 */
+.summary-consumed,
+.summary-exercise {
+  position: relative;
+}
+
 .fly-number {
   position: absolute;
   left: 50%;
-  bottom: 100rpx;
+  top: -10rpx;
   transform: translateX(-50%);
-  font-size: 44rpx;
+  font-size: 36rpx;
   font-weight: 900;
-  color: var(--lime);
   opacity: 0;
   pointer-events: none;
   z-index: 100;
-  text-shadow: 0 4rpx 12rpx rgba(198, 242, 78, 0.4);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 摄入飞数 - 绿色 */
+.fly-number.fly-intake {
+  color: var(--lime);
+  text-shadow: 0 4rpx 12rpx rgba(198, 242, 78, 0.4);
+}
+
+/* 运动消耗飞数 - 蓝色 */
+.fly-number.fly-exercise {
+  color: #4FC3F7;
+  text-shadow: 0 4rpx 12rpx rgba(79, 195, 247, 0.4);
 }
 
 .fly-number.fly-up {
@@ -206,19 +223,19 @@
 @keyframes fly-up-anim {
   0% {
     opacity: 0;
-    transform: translateX(-50%) translateY(0) scale(0.5);
+    transform: translateX(-50%) translateY(0) scale(0.6);
   }
-  20% {
+  15% {
     opacity: 1;
-    transform: translateX(-50%) translateY(-20rpx) scale(1.2);
+    transform: translateX(-50%) translateY(-16rpx) scale(1.15);
   }
-  60% {
+  50% {
     opacity: 1;
-    transform: translateX(-50%) translateY(-80rpx) scale(1);
+    transform: translateX(-50%) translateY(-70rpx) scale(1);
   }
   100% {
     opacity: 0;
-    transform: translateX(-50%) translateY(-140rpx) scale(0.8);
+    transform: translateX(-50%) translateY(-120rpx) scale(0.8);
   }
 }
 
@@ -281,31 +298,136 @@
   font-weight: 500;
 }
 
-/* ===== 搜索入口 ===== */
-.search-card {
+/* 运动消耗 - 亮蓝色 */
+.summary-exercise {
+  flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 18rpx;
-  padding: 26rpx 28rpx;
-  background: var(--surface);
-  border-radius: 999rpx;
+  gap: 4rpx;
 }
 
-.search-icon {
-  width: 56rpx;
-  height: 56rpx;
-  border-radius: 50%;
-  background: var(--lime-soft);
+.summary-exercise .stats-number.exercise-num {
+  color: #4FC3F7;
+  font-size: 36rpx;
+}
+
+/* ===== 核心操作入口 ===== */
+.action-row {
+  display: flex;
+  align-items: stretch;
+  gap: 20rpx;
+}
+
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 28rpx 24rpx;
+  background: var(--surface);
+  border-radius: 20rpx;
+  border: 2rpx solid var(--line);
+  transition: all 0.2s;
+}
+
+.action-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+.action-btn-icon-wrap {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 18rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30rpx;
+  flex-shrink: 0;
 }
 
-.search-placeholder {
+.food-icon-wrap {
+  background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+}
+
+.exercise-icon-wrap {
+  background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+}
+
+.action-btn-icon {
+  font-size: 40rpx;
+}
+
+.action-btn-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.action-btn-title {
   font-size: 28rpx;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.action-btn-desc {
+  font-size: 22rpx;
   color: var(--ink-3);
 }
+
+.food-btn:active {
+  border-color: #FF9800;
+  background: #FFF8E1;
+}
+
+.exercise-btn:active {
+  border-color: var(--lime-deep);
+  background: var(--lime-soft);
+}
+
+/* ===== 运动明细面板（卡片内嵌） ===== */
+.exercise-detail-panel {
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.08);
+}
+
+.exercise-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 12rpx 0;
+}
+
+.exercise-detail-item + .exercise-detail-item {
+  border-top: 1rpx solid rgba(255, 255, 255, 0.06);
+}
+
+.exercise-detail-icon {
+  font-size: 28rpx;
+}
+
+.exercise-detail-name {
+  flex: 1;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.exercise-detail-duration {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.4);
+  margin-right: 12rpx;
+}
+
+.exercise-detail-kcal {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #4FC3F7;
+  font-variant-numeric: tabular-nums;
+}
+
+/* (旧搜索入口样式已移除，改为 action-btn) */
 
 /* ===== 段落 ===== */
 .section {

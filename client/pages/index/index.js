@@ -20,6 +20,12 @@ Page({
     showRecordModal: false,
     selectedFood: null,
     monsterLevel: 0,
+    // 运动相关
+    showExerciseModal: false,
+    showExerciseDetail: false,
+    exerciseRecords: [],
+    exerciseBurned: 0,
+    netIntake: 0,
     // 飞数动效
     flyNumbers: [],
     flyNumberId: 0,
@@ -37,11 +43,12 @@ Page({
   },
 
   onShow() {
-    this.loadTodayData()
+    this.loadTodayData(true) // true = 首次/回到页面，AI分析立即执行
     this.loadRecentFoods()
     this.loadUserTarget()
     this.loadQuickFoods()
     this.loadMealTemplates()
+    this.loadExerciseData()
     this.checkMonsterHungry()
   },
 
@@ -61,9 +68,10 @@ Page({
       const res = await request('/user/profile', 'GET')
       if (res.code === 0 && res.data) {
         const target = res.data.dailyTarget || 1800
+        const current = this.data.netIntake > 0 ? this.data.netIntake : this.data.todayTotal
         this.setData({
           dailyTarget: target,
-          remaining: target - this.data.todayTotal
+          remaining: target - current
         })
       }
     } catch (e) {
@@ -72,7 +80,8 @@ Page({
   },
 
   // 加载今日记录
-  async loadTodayData() {
+  // immediate: true=立即AI分析（onShow），false/undefined=防抖延迟分析（记录变更后）
+  async loadTodayData(immediate) {
     try {
       const today = formatDate(new Date())
       const res = await request(`/records?date=${today}`, 'GET')
@@ -95,15 +104,21 @@ Page({
           }
         })
 
+        // 净摄入 = 摄入 - 运动消耗（抵扣上限：最多抵消摄入的30%）
+        const maxDeduction = todayTotal * 0.3
+        const actualDeduction = Math.min(this.data.exerciseBurned, maxDeduction)
+        const netIntake = Math.round(todayTotal - actualDeduction)
+
         this.setData({
           todayTotal,
-          remaining: this.data.dailyTarget - todayTotal,
+          netIntake,
+          remaining: this.data.dailyTarget - netIntake,
           meals,
           streak: res.data.streak || 0
         })
         // 数据加载完毕后再检测喊饿 & 营养提示
         this.checkMonsterHungry()
-        this.analyzeNutrition()
+        this.analyzeNutrition(immediate)
       }
     } catch (e) {
       console.log('loadTodayData error:', e)
@@ -491,9 +506,28 @@ Page({
     this.setData({ monsterHungry, hungryMessage })
   },
 
-  // ====== 营养均衡提示 ======
-  analyzeNutrition() {
-    const { meals, todayTotal, dailyTarget } = this.data
+  // ====== 营养均衡提示（AI 分析 + 本地降级） ======
+  // 防抖入口：连续操作时不频繁调 AI，停下来 3 秒后才分析
+  analyzeNutrition(immediate) {
+    // immediate = true 时立即执行（如 onShow 回到首页）
+    if (this._nutritionTimer) {
+      clearTimeout(this._nutritionTimer)
+      this._nutritionTimer = null
+    }
+
+    if (immediate) {
+      this._doAnalyzeNutrition()
+    } else {
+      // 防抖 3 秒：用户连续记录时不会每条都调 AI
+      this._nutritionTimer = setTimeout(() => {
+        this._nutritionTimer = null
+        this._doAnalyzeNutrition()
+      }, 3000)
+    }
+  },
+
+  async _doAnalyzeNutrition() {
+    const { meals, todayTotal, dailyTarget, exerciseBurned } = this.data
     const hour = new Date().getHours()
 
     // 至少记录了一餐才给建议
@@ -503,80 +537,69 @@ Page({
       return
     }
 
+    // 构造饮食数据摘要
+    const mealData = meals.map(m => ({
+      name: m.name.replace(/[^\u4e00-\u9fa5]/g, ''), // 去掉 emoji
+      kcal: m.total,
+      foods: m.records.map(r => r.foodName)
+    }))
+
+    // 生成数据指纹，避免数据没变时重复调用 AI
+    const dataFingerprint = JSON.stringify({ mealData, todayTotal, dailyTarget })
+    if (this._lastNutritionFingerprint === dataFingerprint && this.data.nutritionTip) {
+      return // 数据没变，跳过
+    }
+    this._lastNutritionFingerprint = dataFingerprint
+
+    // 总记录数少于 2 条时，用本地规则就够了，不浪费 AI
+    const totalRecords = meals.reduce((sum, m) => sum + m.records.length, 0)
+    if (totalRecords < 2) {
+      this.fallbackNutritionAnalysis()
+      return
+    }
+
+    // 调 AI 分析
+    try {
+      const res = await request('/ai-estimate/nutrition', 'POST', {
+        meals: mealData,
+        todayTotal,
+        dailyTarget,
+        exerciseBurned: exerciseBurned || 0,
+        hour
+      })
+
+      if (res.code === 0 && res.data) {
+        this.setData({ nutritionTip: res.data })
+        return
+      }
+    } catch (e) {
+      console.log('AI nutrition analysis error:', e)
+    }
+
+    // AI 失败，降级到本地简易规则
+    this.fallbackNutritionAnalysis()
+  },
+
+  // 本地降级营养分析（AI 不可用时使用）
+  fallbackNutritionAnalysis() {
+    const { meals, todayTotal, dailyTarget } = this.data
+    const hour = new Date().getHours()
     let tip = null
 
-    // 分析各餐热量占比
-    const breakfast = meals.find(m => m.key === 'breakfast')
-    const lunch = meals.find(m => m.key === 'lunch')
-    const dinner = meals.find(m => m.key === 'dinner')
-    const snack = meals.find(m => m.key === 'snack')
+    const bfKcal = meals.find(m => m.key === 'breakfast')?.total || 0
+    const dinnerKcal = meals.find(m => m.key === 'dinner')?.total || 0
+    const snackKcal = meals.find(m => m.key === 'snack')?.total || 0
 
-    const bfKcal = breakfast ? breakfast.total : 0
-    const lunchKcal = lunch ? lunch.total : 0
-    const dinnerKcal = dinner ? dinner.total : 0
-    const snackKcal = snack ? snack.total : 0
-
-    // 1. 早餐太少（占比 < 15% 且已过中午）
     if (hour >= 12 && bfKcal > 0 && bfKcal < todayTotal * 0.15) {
-      tip = {
-        icon: '🥣',
-        title: '早餐偏少',
-        desc: '早餐建议占全天25-30%，明天可以适当丰富一下~'
-      }
-    }
-
-    // 2. 晚餐占比过高（> 45%）
-    if (!tip && hour >= 20 && dinnerKcal > todayTotal * 0.45) {
-      tip = {
-        icon: '🌙',
-        title: '晚餐偏重',
-        desc: '晚餐热量占比偏高，建议把部分热量分配到午餐'
-      }
-    }
-
-    // 3. 加餐热量过高（> 25%）
-    if (!tip && snackKcal > todayTotal * 0.25 && snackKcal > 300) {
-      tip = {
-        icon: '🍪',
-        title: '零食稍多',
-        desc: '加餐热量偏高，可以选择水果或坚果替代~'
-      }
-    }
-
-    // 4. 某一餐热量集中（单餐 > 60%）
-    if (!tip) {
-      const maxMeal = [bfKcal, lunchKcal, dinnerKcal].reduce((a, b) => Math.max(a, b), 0)
-      if (maxMeal > todayTotal * 0.6 && todayTotal > 500) {
-        tip = {
-          icon: '⚖️',
-          title: '分配不均',
-          desc: '单餐热量过高，建议三餐均衡分配（3:4:3）更健康'
-        }
-      }
-    }
-
-    // 5. 剩余预算紧张 but 还没吃晚餐
-    if (!tip && hour < 18 && dinnerKcal === 0) {
+      tip = { icon: '🥣', title: '早餐偏少', desc: '早餐建议占全天25-30%，明天可以适当丰富一下~' }
+    } else if (hour >= 20 && dinnerKcal > todayTotal * 0.45) {
+      tip = { icon: '🌙', title: '晚餐偏重', desc: '晚餐热量占比偏高，建议把部分热量分配到午餐' }
+    } else if (snackKcal > todayTotal * 0.25 && snackKcal > 300) {
+      tip = { icon: '🍪', title: '零食稍多', desc: '加餐热量偏高，可以选择水果或坚果替代~' }
+    } else if (hour < 18 && dinnerKcal === 0) {
       const remaining = dailyTarget - todayTotal
       if (remaining > 0 && remaining < dailyTarget * 0.25) {
-        tip = {
-          icon: '💡',
-          title: '预算紧张',
-          desc: `晚餐还剩 ${remaining} 大卡，建议选择轻食哦~`
-        }
-      }
-    }
-
-    // 6. 正向反馈 — 分配比较均衡
-    if (!tip && recordedMeals.length >= 3) {
-      const ratios = [bfKcal, lunchKcal, dinnerKcal].map(k => k / todayTotal)
-      const balanced = ratios.every(r => r >= 0.2 && r <= 0.45)
-      if (balanced) {
-        tip = {
-          icon: '✨',
-          title: '均衡饮食',
-          desc: '今天三餐分配不错，继续保持！'
-        }
+        tip = { icon: '💡', title: '预算紧张', desc: `晚餐还剩 ${remaining} 大卡，建议选择轻食哦~` }
       }
     }
 
@@ -610,20 +633,32 @@ Page({
   },
 
   // ====== 飞数动效 ======
-  // 显示热量飞数动画
+  // 显示热量飞数动画（先滚回顶部让用户看到怪兽反馈）
   showFlyNumber(kcal) {
-    const id = this.data.flyNumberId + 1
-    const flyItem = { id, kcal: `+${kcal}`, animating: true }
-    const flyNumbers = [...this.data.flyNumbers, flyItem]
+    // 先滚动到顶部，确保怪兽卡片可见
+    wx.pageScrollTo({
+      scrollTop: 0,
+      duration: 200
+    })
 
-    this.setData({ flyNumbers, flyNumberId: id })
-
-    // 动画结束后移除
+    // 稍微延迟后再播放飞数，等滚动到位
     setTimeout(() => {
-      const updated = this.data.flyNumbers.filter(item => item.id !== id)
-      this.setData({ flyNumbers: updated })
-    }, 1200)
+      const id = this.data.flyNumberId + 1
+      const prefix = kcal >= 0 ? '+' : ''
+      const flyItem = { id, kcal: `${prefix}${kcal}`, animating: true, isExercise: kcal < 0 }
+      const flyNumbers = [...this.data.flyNumbers, flyItem]
+
+      this.setData({ flyNumbers, flyNumberId: id })
+
+      // 动画结束后移除
+      setTimeout(() => {
+        const updated = this.data.flyNumbers.filter(item => item.id !== id)
+        this.setData({ flyNumbers: updated })
+      }, 1200)
+    }, 250)
   },
+
+
 
   // ====== 怪兽交互 ======
   // 怪兽档位变化 → 背景联动
@@ -634,8 +669,9 @@ Page({
 
   // 点击怪兽
   onMonsterTap() {
+    const current = this.data.netIntake > 0 ? this.data.netIntake : this.data.todayTotal
     const percent = this.data.dailyTarget > 0
-      ? Math.round((this.data.todayTotal / this.data.dailyTarget) * 100)
+      ? Math.round((current / this.data.dailyTarget) * 100)
       : 0
 
     // 随机回复一句
@@ -670,5 +706,94 @@ Page({
       return ['到上限了...管住嘴！', '超了一点，问题不大', '今天就到这里吧']
     }
     return ['我要炸了！！！', '今天放飞自我了...', '明天一定要补回来！']
+  },
+
+  // ====== 运动记录 ======
+  // 加载今日运动数据
+  async loadExerciseData() {
+    try {
+      const today = formatDate(new Date())
+      const res = await request(`/exercises?date=${today}`, 'GET')
+      if (res.code === 0) {
+        const exerciseRecords = res.data.records || []
+        const exerciseBurned = res.data.totalBurned || 0
+        this.setData({ exerciseRecords, exerciseBurned })
+        // 重新计算净摄入和剩余
+        this.recalcNetIntake()
+      }
+    } catch (e) {
+      console.log('loadExerciseData error:', e)
+    }
+  },
+
+  // 重新计算净摄入
+  recalcNetIntake() {
+    const { todayTotal, exerciseBurned, dailyTarget } = this.data
+    // 抵扣上限：最多抵消摄入的30%
+    const maxDeduction = todayTotal * 0.3
+    const actualDeduction = Math.min(exerciseBurned, maxDeduction)
+    const netIntake = Math.round(todayTotal - actualDeduction)
+    this.setData({
+      netIntake,
+      remaining: dailyTarget - netIntake
+    })
+  },
+
+  // 打开运动记录弹窗
+  // 展开/收起运动明细
+  toggleExerciseDetail() {
+    this.setData({ showExerciseDetail: !this.data.showExerciseDetail })
+  },
+
+  openExerciseModal() {
+    this.setData({ showExerciseModal: true })
+  },
+
+  // 关闭运动记录弹窗
+  onExerciseModalClose() {
+    this.setData({ showExerciseModal: false })
+  },
+
+  // 运动记录确认
+  async onExerciseConfirm(e) {
+    const { exerciseName, icon, duration, kcalBurned } = e.detail
+    try {
+      const res = await request('/exercises', 'POST', {
+        exerciseName,
+        icon,
+        duration,
+        kcalBurned,
+        date: formatDate(new Date())
+      })
+      if (res.code === 0) {
+        this.setData({ showExerciseModal: false })
+        wx.showToast({ title: `消耗 ${kcalBurned} 大卡 🏃`, icon: 'none', duration: 2000 })
+        // 先加载数据（确保"运动消耗"数字已渲染），再播飞数动效
+        await Promise.all([this.loadExerciseData(), this.loadTodayData()])
+        this.showFlyNumber(-kcalBurned)
+      }
+    } catch (e) {
+      wx.showToast({ title: '记录失败', icon: 'none' })
+    }
+  },
+
+  // 长按运动记录（删除）
+  onExerciseLongPress(e) {
+    const record = e.currentTarget.dataset.record
+    wx.showActionSheet({
+      itemList: ['删除此运动记录'],
+      success: async (res) => {
+        if (res.tapIndex === 0) {
+          try {
+            await request(`/exercises/${record.id}`, 'DELETE')
+            wx.showToast({ title: '已删除', icon: 'success' })
+            this.loadExerciseData()
+            this.loadTodayData()
+          } catch (e) {
+            wx.showToast({ title: '删除失败', icon: 'none' })
+          }
+        }
+      }
+    })
   }
 })

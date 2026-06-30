@@ -1,0 +1,510 @@
+/* 运动记录弹窗样式 */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  animation: fade-in 0.2s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  width: 100%;
+  background: var(--bg, #f5f5f5);
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 32rpx 32rpx 60rpx;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: slide-up 0.3s ease;
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* 标题 */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+
+.modal-title {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: var(--ink, #1a1a1a);
+}
+
+.modal-close {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  color: var(--ink-3, #999);
+  border-radius: 50%;
+  background: var(--surface, #fff);
+}
+
+/* 段落标签 */
+.section-label {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--ink, #1a1a1a);
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+/* 运动类型网格 */
+.exercise-section {
+  margin-bottom: 32rpx;
+}
+
+.exercise-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12rpx;
+}
+
+.exercise-type {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 8rpx 16rpx;
+  background: var(--surface, #fff);
+  border-radius: 16rpx;
+  border: 2rpx solid var(--line, #eee);
+  transition: all 0.15s;
+}
+
+.exercise-type.active {
+  border-color: var(--lime-deep, #5E8B00);
+  background: var(--lime-soft, #f0f7e0);
+  transform: scale(0.96);
+}
+
+.exercise-type:active {
+  transform: scale(0.92);
+}
+
+.type-icon {
+  font-size: 36rpx;
+  margin-bottom: 6rpx;
+}
+
+.type-name {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--ink, #1a1a1a);
+  text-align: center;
+}
+
+.type-cal {
+  font-size: 18rpx;
+  color: var(--ink-3, #999);
+  margin-top: 4rpx;
+}
+
+/* 时长输入 */
+.duration-section {
+  margin-bottom: 32rpx;
+}
+
+.duration-shortcuts {
+  display: flex;
+  gap: 12rpx;
+  flex-wrap: wrap;
+  margin-bottom: 16rpx;
+}
+
+.shortcut-btn {
+  padding: 14rpx 24rpx;
+  background: var(--surface, #fff);
+  border: 2rpx solid var(--line, #eee);
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--ink, #1a1a1a);
+}
+
+.shortcut-btn.active {
+  border-color: var(--lime-deep, #5E8B00);
+  background: var(--lime-soft, #f0f7e0);
+  color: var(--lime-deep, #5E8B00);
+}
+
+.custom-duration {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.custom-label {
+  font-size: 24rpx;
+  color: var(--ink-3, #999);
+  flex-shrink: 0;
+}
+
+.duration-input {
+  flex: 1;
+  height: 72rpx;
+  background: var(--surface, #fff);
+  border: 2rpx solid var(--line, #eee);
+  border-radius: 16rpx;
+  padding: 0 20rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  text-align: center;
+}
+
+.duration-unit {
+  font-size: 24rpx;
+  color: var(--ink-3, #999);
+}
+
+/* 预估消耗 */
+.estimate-section {
+  margin-bottom: 32rpx;
+}
+
+.estimate-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 28rpx;
+  background: linear-gradient(135deg, #FFF8E1, #FFF3CD);
+  border-radius: 20rpx;
+  border: 1rpx solid rgba(255, 193, 7, 0.3);
+  margin-bottom: 16rpx;
+}
+
+.estimate-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.estimate-icon {
+  font-size: 32rpx;
+}
+
+.estimate-label {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #5D4E37;
+}
+
+.estimate-right {
+  display: flex;
+  align-items: baseline;
+  gap: 6rpx;
+}
+
+.estimate-value {
+  font-size: 40rpx;
+  font-weight: 900;
+  color: #E65100;
+  font-variant-numeric: tabular-nums;
+}
+
+.estimate-unit {
+  font-size: 22rpx;
+  color: #5D4E37;
+}
+
+/* 手动调整 */
+.adjust-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.adjust-label {
+  font-size: 24rpx;
+  color: var(--ink-3, #999);
+  flex-shrink: 0;
+}
+
+.adjust-input {
+  flex: 1;
+  height: 64rpx;
+  background: var(--surface, #fff);
+  border: 2rpx solid var(--line, #eee);
+  border-radius: 12rpx;
+  padding: 0 16rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  text-align: center;
+}
+
+.adjust-unit {
+  font-size: 24rpx;
+  color: var(--ink-3, #999);
+}
+
+/* ===== Tab 切换 ===== */
+.tab-row {
+  display: flex;
+  background: var(--surface, #fff);
+  border-radius: 16rpx;
+  padding: 6rpx;
+  margin-bottom: 28rpx;
+  border: 2rpx solid var(--line, #eee);
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18rpx 0;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--ink-3, #999);
+  transition: all 0.2s;
+}
+
+.tab-item.active {
+  background: var(--lime-deep, #5E8B00);
+  color: #fff;
+  box-shadow: 0 4rpx 12rpx rgba(94, 139, 0, 0.3);
+}
+
+.tab-content {
+  min-height: 200rpx;
+}
+
+/* ===== 自定义运动输入 ===== */
+.custom-section {
+  margin-bottom: 32rpx;
+}
+
+.custom-input-wrap {
+  margin-top: 12rpx;
+}
+
+.custom-name-input {
+  width: 100%;
+  height: 88rpx;
+  background: var(--surface, #fff);
+  border: 2rpx solid var(--line, #eee);
+  border-radius: 16rpx;
+  padding: 0 28rpx;
+  font-size: 28rpx;
+  color: var(--ink, #1a1a1a);
+  box-sizing: border-box;
+}
+
+/* ===== AI 估算按钮 ===== */
+.ai-estimate-section {
+  margin-bottom: 28rpx;
+}
+
+.ai-estimate-btn {
+  width: 100% !important;
+  height: 88rpx;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 700;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
+}
+
+.ai-estimate-btn.loading {
+  opacity: 0.7;
+}
+
+.ai-estimate-btn::after {
+  border: none;
+}
+
+.ai-btn-icon {
+  font-size: 32rpx;
+}
+
+.ai-btn-text {
+  font-size: 28rpx;
+}
+
+/* ===== AI 估算结果 ===== */
+.ai-result-section {
+  margin-bottom: 28rpx;
+}
+
+.ai-result-card {
+  background: linear-gradient(135deg, #f3e7ff, #e8f4ff);
+  border-radius: 20rpx;
+  padding: 24rpx 28rpx;
+  border: 1rpx solid rgba(102, 126, 234, 0.2);
+  margin-bottom: 16rpx;
+}
+
+.ai-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.ai-result-title {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #5a4a8a;
+}
+
+.ai-result-confidence {
+  font-size: 20rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  font-weight: 600;
+}
+
+.ai-result-confidence.high {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.ai-result-confidence.medium {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.ai-result-confidence.low {
+  background: #fce4ec;
+  color: #c62828;
+}
+
+.ai-result-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.ai-result-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ai-result-name {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--ink, #1a1a1a);
+}
+
+.ai-result-kcal-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6rpx;
+}
+
+.ai-result-kcal {
+  font-size: 44rpx;
+  font-weight: 900;
+  color: #667eea;
+  font-variant-numeric: tabular-nums;
+}
+
+.ai-result-kcal-unit {
+  font-size: 22rpx;
+  color: #5a4a8a;
+}
+
+.ai-result-meta {
+  display: flex;
+  gap: 24rpx;
+  font-size: 22rpx;
+  color: var(--ink-3, #999);
+}
+
+.ai-result-intensity {
+  font-weight: 600;
+}
+
+.ai-result-tip {
+  font-size: 22rpx;
+  color: #5a4a8a;
+  margin-top: 4rpx;
+  line-height: 1.4;
+}
+
+/* ===== 手动输入热量 ===== */
+.manual-kcal-section {
+  margin-bottom: 28rpx;
+}
+
+.manual-kcal-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.manual-kcal-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.manual-kcal-input {
+  flex: 1;
+  height: 80rpx;
+  background: var(--surface, #fff);
+  border: 2rpx solid var(--line, #eee);
+  border-radius: 16rpx;
+  padding: 0 24rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  text-align: center;
+}
+
+.manual-kcal-unit {
+  font-size: 26rpx;
+  color: var(--ink-3, #999);
+  flex-shrink: 0;
+}
+
+/* ===== 确认按钮 ===== */
+.modal-footer {
+  margin-top: 16rpx;
+}
+
+.confirm-btn {
+  width: 390rpx!important;
+  height: 96rpx;
+  background: var(--lime-deep, #5E8B00);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 700;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.confirm-btn.disabled {
+  opacity: 0.4;
+}
+
+.confirm-btn::after {
+  border: none;
+}

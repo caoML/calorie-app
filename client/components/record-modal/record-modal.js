@@ -10,7 +10,9 @@ Component({
     portionOptions: [],
     selectedPortion: 100,
     customGrams: '',
+    customKcal: 0,
     selectedMeal: '',
+    selectedMealName: '午餐',
     estimatedKcal: 0,
     totalKcal: 0,
     // 分食相关
@@ -43,12 +45,15 @@ Component({
     // 初始化弹窗
     initModal() {
       const defaultMeal = getDefaultMeal()
+      const mealNameMap = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '加餐' }
       this.setData({
         selectedMeal: defaultMeal,
+        selectedMealName: mealNameMap[defaultMeal] || '午餐',
         showShare: false,
         sharePeople: 1,
         shareRatio: 'equal',
-        shareText: ''
+        shareText: '',
+        customKcal: 0
       })
     },
 
@@ -69,11 +74,17 @@ Component({
         options = food.servings.map(s => ({
           label: s.label,
           value: s.grams,
-          desc: s.desc || ''
+          desc: s.desc || '',
+          kcal: Math.round(food.kcalPer100g * s.grams / 100)
         }))
       } else {
         // 默认份量使用生活化描述
         options = this.getVisualPortions(food)
+        // 为每个选项计算热量
+        options = options.map(opt => ({
+          ...opt,
+          kcal: Math.round(food.kcalPer100g * opt.value / 100)
+        }))
       }
 
       const defaultPortion = options.length > 0 ? options[Math.min(1, options.length - 1)].value : 100
@@ -83,6 +94,7 @@ Component({
         portionOptions: options,
         selectedPortion: defaultPortion,
         customGrams: '',
+        customKcal: 0,
         totalKcal,
         estimatedKcal: totalKcal
       })
@@ -160,8 +172,12 @@ Component({
 
     // 自定义克数输入
     onCustomInput(e) {
+      const grams = e.detail.value
+      const food = this.properties.food
+      const customKcal = grams ? Math.round(food.kcalPer100g * Number(grams) / 100) : 0
       this.setData({
-        customGrams: e.detail.value,
+        customGrams: grams,
+        customKcal,
         selectedPortion: 0
       })
       this.recalcKcal()
@@ -231,7 +247,12 @@ Component({
 
     // 选择餐次
     selectMeal(e) {
-      this.setData({ selectedMeal: e.currentTarget.dataset.key })
+      const key = e.currentTarget.dataset.key
+      const mealNameMap = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '加餐' }
+      this.setData({
+        selectedMeal: key,
+        selectedMealName: mealNameMap[key] || '午餐'
+      })
     },
 
     // 确认记录

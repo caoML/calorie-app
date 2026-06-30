@@ -7,14 +7,14 @@
  * 接近上限 → 怪兽越来越膨胀紧张（警示）
  * 超过上限 → 怪兽要爆炸了（超标）
  * 
- * 档位分布（前 80% 都是正面/中性状态）：
+ * 档位分布（100% 为明确分水岭）：
  * 0: 0%~20%    → 超级轻盈，无负担（最好状态）
  * 1: 20%~40%   → 活力满满，状态不错
  * 2: 40%~60%   → 状态不错，正常进食
  * 3: 60%~80%   → 平稳正常，三餐吃得差不多了
- * 4: 80%~95%   → 注意一下，快到上限了
- * 5: 95%~115%  → 快超了/刚超，紧张
- * 6: >115%     → 爆炸，明显超标
+ * 4: 80%~100%  → 快到上限了，注意控制
+ * 5: 100%~120% → 已经超了，别再吃了
+ * 6: >120%     → 爆炸，严重超标
  */
 
 // 怪兽台词配置（每个档位多条随机）
@@ -47,23 +47,23 @@ const MONSTER_QUOTES = [
     '🍃 还行，注意控制零食哦',
     '⏰ 预算过半了，后面悠着点'
   ],
-  // 4 - 注意一下
+  // 4 - 快到上限
   [
-    '😐 预算快用完了，注意一下哦',
-    '⚠️ 快到上限了，悠着点！',
+    '😐 快到上限了，注意控制哦',
+    '⚠️ 预算快用完了，悠着点！',
     '🫣 再吃就超了哦...',
-    '🛑 刹车刹车！差不多了'
+    '🛑 差不多了，后面忍忍！'
   ],
-  // 5 - 快超了/刚超
+  // 5 - 已经超了
   [
-    '😰 到上限了！管住嘴！',
-    '🚨 超标警告！别再吃了！',
+    '😰 超了！管住嘴！',
+    '🚨 已经超标了！别再吃了！',
     '😱 我快撑爆了...求你停',
-    '💥 危险危险！远离零食！'
+    '💥 超预算了！远离零食！'
   ],
   // 6 - 爆炸
   [
-    '🤯 超标了...明天补回来吧',
+    '🤯 严重超标...明天补回来吧',
     '💀 彻底炸了...算了躺平',
     '🫠 我已经...不是我了...',
     '😵‍💫 今天就这样吧，明天重来'
@@ -76,9 +76,20 @@ const MONSTER_STATES = [
   'energetic',   // 1 - 活力满满
   'good',        // 2 - 状态不错
   'steady',      // 3 - 平稳正常
-  'cautious',    // 4 - 注意一下
-  'tense',       // 5 - 快超了/刚超
+  'cautious',    // 4 - 快到上限
+  'exceeded',    // 5 - 已经超了
   'exploding'    // 6 - 爆炸
+]
+
+// 怪兽图片 CDN 地址（对应 7 个档位）
+const MONSTER_IMAGES = [
+  'https://image.zhls.qq.com/srimage/tool/e6851d10a44c45628c19514cd0112893.png', // 0 - 超级轻盈
+  'https://image.zhls.qq.com/srimage/tool/0edd1c4f01de48a0908425aca5ca0551.png', // 1 - 活力满满
+  'https://image.zhls.qq.com/srimage/tool/9a17f9a275524bbeb9a080ba38ad5a59.png', // 2 - 状态不错
+  'https://image.zhls.qq.com/srimage/tool/ea4c72d73b334ed99307cc9c5f6fd1ac.png', // 3 - 平稳正常
+  'https://image.zhls.qq.com/srimage/tool/0f4cf29525654445a8791efe3c076ac7.png', // 4 - 注意一下
+  'https://image.zhls.qq.com/srimage/tool/df94c11be350440fa9d3bd8c1ad559b4.png', // 5 - 快超了/刚超
+  'https://image.zhls.qq.com/srimage/tool/cae4ccc577734e1b88106498767f2f91.png', // 6 - 爆炸
 ]
 
 Component({
@@ -99,7 +110,7 @@ Component({
     level: 0,            // 当前档位 0-6
     quote: MONSTER_QUOTES[0][0],
     stateName: MONSTER_STATES[0],
-    monsterImageA: '/images/monster/level-0.png',  // 图层A
+    monsterImageA: MONSTER_IMAGES[0],  // 图层A
     monsterImageB: '',                              // 图层B
     imgSwitch: false,    // false=显示A，true=显示B
     percent: 0,          // 预算消耗百分比
@@ -137,7 +148,7 @@ Component({
         return
       }
 
-      const newImage = `/images/monster/level-${level}.png`
+      const newImage = MONSTER_IMAGES[level]
       const currentSwitch = this.data.imgSwitch
 
       // 档位变化 → 播放变身动画 + 交叉淡入淡出
@@ -186,8 +197,8 @@ Component({
       if (percent < 40) return 1
       if (percent < 60) return 2
       if (percent < 80) return 3
-      if (percent < 95) return 4
-      if (percent <= 115) return 5
+      if (percent < 100) return 4
+      if (percent <= 120) return 5
       return 6
     },
 

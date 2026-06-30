@@ -3,6 +3,7 @@
     "food-card": "../../components/food-card/food-card",
     "record-modal": "../../components/record-modal/record-modal",
     "progress-ring": "../../components/progress-ring/progress-ring",
-    "monster": "../../components/monster/monster"
+    "monster": "../../components/monster/monster",
+    "exercise-modal": "../../components/exercise-modal/exercise-modal"
   }
 }
