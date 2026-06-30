@@ -26,10 +26,22 @@ export class FoodController {
       this.userFoodService.search(userId, keyword),
     ]);
 
-    // 合并结果：私人库优先展示在前面（标记来源）
+    // 私人库内部去重（同名只保留一条，优先 useCount 高的）
+    const dedupedUserMap = new Map<string, typeof userResults[0]>();
+    for (const f of userResults) {
+      if (!dedupedUserMap.has(f.name) || (f.useCount || 0) > (dedupedUserMap.get(f.name).useCount || 0)) {
+        dedupedUserMap.set(f.name, f);
+      }
+    }
+    const dedupedUser = Array.from(dedupedUserMap.values());
+
+    // 合并结果：私人库优先，公共库去重（同名食物只保留私人库的）
+    const userNames = new Set(dedupedUser.map(f => f.name));
+    const dedupedPublic = publicResults.filter(f => !userNames.has(f.name));
+
     const combined = [
-      ...userResults.map(f => ({ ...f, source: f.source || 'user' })),
-      ...publicResults.map(f => ({ ...f, source: 'system', isUserFood: false })),
+      ...dedupedUser.map(f => ({ ...f, source: f.source || 'user' })),
+      ...dedupedPublic.map(f => ({ ...f, source: 'system', isUserFood: false })),
     ];
 
     // 如果公共库精确匹配为空，尝试模糊推荐

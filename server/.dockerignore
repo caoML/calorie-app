@@ -1,0 +1,20 @@
+# 本机依赖是 macOS 编译的，必须让容器重新装/编译（尤其 better-sqlite3）
+node_modules
+
+# 编译产物由容器内 npm run build 生成
+dist
+
+# 本地数据库文件不打进镜像（数据通过 volume 持久化）
+calorie.db
+*.db
+
+# 敏感配置不打进镜像，运行时由 compose 的 env_file 注入
+.env
+
+# 其它无关文件
+logs
+*.log
+.git
+.gitignore
+*.md
+ecosystem.config.js

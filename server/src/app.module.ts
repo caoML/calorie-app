@@ -8,12 +8,14 @@ import { QuickFoodModule } from './modules/quick-food/quick-food.module';
 import { MealTemplateModule } from './modules/meal-template/meal-template.module';
 import { UserFoodModule } from './modules/user-food/user-food.module';
 import { AiEstimateModule } from './modules/ai-estimate/ai-estimate.module';
+import { ExerciseModule } from './modules/exercise/exercise.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'better-sqlite3',
-      database: 'calorie.db',
+      // 默认相对路径（本地开发不变）；容器里通过 DB_PATH 指向持久化目录
+      database: process.env.DB_PATH || 'calorie.db',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true, // 开发环境自动同步表结构，生产环境关闭
     }),
@@ -25,6 +27,7 @@ import { AiEstimateModule } from './modules/ai-estimate/ai-estimate.module';
     MealTemplateModule,
     UserFoodModule,
     AiEstimateModule,
+    ExerciseModule,
   ],
 })
 export class AppModule {}

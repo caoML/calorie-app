@@ -88,6 +88,123 @@ export class AiEstimateService {
     }
   }
 
+  // ====== AI 营养均衡分析 ======
+  // 内存缓存：userId -> { hash, result, timestamp }
+  private nutritionCache = new Map<number, { hash: string; result: any; timestamp: number }>();
+
+  async analyzeNutrition(userId: number, dietData: {
+    meals: { name: string; kcal: number; foods: string[] }[];
+    todayTotal: number;
+    dailyTarget: number;
+    exerciseBurned: number;
+    hour: number;
+  }): Promise<{
+    icon: string;
+    title: string;
+    desc: string;
+    tag?: string;
+  } | null> {
+    // 没有饮食数据就不分析
+    const hasFoods = dietData.meals.some(m => m.foods.length > 0);
+    if (!hasFoods || dietData.todayTotal === 0) return null;
+
+    // 用饮食数据生成 hash，相同数据直接返回缓存
+    const dataHash = JSON.stringify({
+      meals: dietData.meals,
+      total: dietData.todayTotal,
+      target: dietData.dailyTarget,
+      exercise: dietData.exerciseBurned,
+    });
+
+    const cached = this.nutritionCache.get(userId);
+    if (cached && cached.hash === dataHash) {
+      return cached.result;
+    }
+
+    const mealsDesc = dietData.meals
+      .filter(m => m.foods.length > 0)
+      .map(m => `${m.name}(${m.kcal}大卡): ${m.foods.join('、')}`)
+      .join('\n');
+
+    const prompt = `你是一个温暖、专业的营养顾问。根据用户今天的饮食记录，给出一条简短的营养建议。
+
+用户信息：
+- 每日目标热量：${dietData.dailyTarget} 大卡
+- 今日已摄入：${dietData.todayTotal} 大卡
+- 今日运动消耗：${dietData.exerciseBurned} 大卡
+- 当前时间：${dietData.hour}点
+
+今日饮食：
+${mealsDesc}
+
+请分析用户的饮食结构，从以下角度选择最值得提醒的一点：
+1. 营养素均衡性（是否蛋白质/蔬菜/碳水偏少或过多）
+2. 各餐热量分配（是否某餐占比过重）
+3. 食物多样性（是否太单一）
+4. 正向鼓励（如果整体还不错的话）
+
+请严格按以下JSON格式返回（不要添加任何其他文字）：
+{
+  "icon": "一个最合适的emoji",
+  "title": "2-4字标题",
+  "desc": "15-30字的建议，要口语化、温暖，不要太教条",
+  "tag": "positive/suggestion/warning 三选一"
+}
+
+注意：
+- 只给一条最重要的建议，不要面面俱到
+- 语气要像朋友聊天，不要像医生说教
+- 如果整体还不错就给正向反馈，不要硬挑毛病`;
+
+    try {
+      const apiKey = process.env.AI_API_KEY || '';
+      const apiUrl = process.env.AI_API_URL || 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+      const model = process.env.AI_MODEL || 'glm-4-plus';
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.6,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`AI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content || '';
+
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('AI 返回格式异常');
+      }
+
+      const result = JSON.parse(jsonMatch[0]);
+      const tip = {
+        icon: result.icon || '💡',
+        title: result.title || '饮食建议',
+        desc: result.desc || '注意营养均衡哦~',
+        tag: result.tag || 'suggestion',
+      };
+
+      // 写入缓存
+      this.nutritionCache.set(userId, { hash: dataHash, result: tip, timestamp: Date.now() });
+
+      return tip;
+    } catch (error) {
+      console.error('AI 营养分析失败:', error.message);
+      // AI 失败时返回 null，前端会 fallback 到本地规则
+      return null;
+    }
+  }
+
   // 降级估算（当AI不可用时）
   private fallbackEstimate(foodName: string) {
     // 根据常见关键词粗略估算

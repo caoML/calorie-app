@@ -23,6 +23,22 @@ export class AiEstimateController {
     return { code: 0, data: result };
   }
 
+  // AI 营养均衡分析
+  @Post('nutrition')
+  async analyzeNutrition(
+    @CurrentUser('id') userId: number,
+    @Body() body: {
+      meals: { name: string; kcal: number; foods: string[] }[];
+      todayTotal: number;
+      dailyTarget: number;
+      exerciseBurned: number;
+      hour: number;
+    },
+  ) {
+    const result = await this.aiEstimateService.analyzeNutrition(userId, body);
+    return { code: 0, data: result };
+  }
+
   // AI 估算 + 自动保存到私人库
   @Post('save')
   async estimateAndSave(
@@ -35,8 +51,8 @@ export class AiEstimateController {
 
     const result = await this.aiEstimateService.estimateCalories(body.foodName);
 
-    // 保存到用户私人食物库
-    const saved = await this.userFoodService.create(userId, {
+    // 保存到用户私人食物库（同名食物更新，不重复创建）
+    const saved = await this.userFoodService.upsertByName(userId, {
       name: result.name,
       category: result.category,
       kcalPer100g: result.kcalPer100g,

@@ -1,0 +1,22 @@
+# 单服务版：只跑你的 NestJS 后端，数据库用 SQLite 文件 + volume 持久化
+# 用法见同目录 README 或下方注释
+
+services:
+  server:
+    build: .                      # 用当前目录的 Dockerfile 构建镜像
+    container_name: calorie-server
+    restart: always               # 容器异常退出自动重启（替代 PM2 的守护作用）
+    ports:
+      - "3000:3000"               # 主机3000 -> 容器3000
+
+    # 把 .env 里的微信/AI 等密钥注入容器（不写进镜像，更安全）
+    env_file:
+      - .env
+
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_PATH=/app/data/calorie.db   # 数据库落到持久化目录
+
+    volumes:
+      - ./data:/app/data          # 容器内 /app/data <-> 主机 ./data，删容器也不丢数据

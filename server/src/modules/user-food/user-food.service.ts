@@ -51,6 +51,25 @@ export class UserFoodService {
     return this.userFoodRepo.save(food);
   }
 
+  // 按名称 upsert：同名食物更新，不存在则创建（避免私人库重复）
+  async upsertByName(userId: number, data: Partial<UserFood>) {
+    const existing = await this.userFoodRepo.findOne({
+      where: { userId, name: data.name },
+    });
+
+    if (existing) {
+      // 已存在同名食物，更新数据
+      if (data.servings && typeof data.servings !== 'string') {
+        data.servings = JSON.stringify(data.servings);
+      }
+      Object.assign(existing, data);
+      return this.userFoodRepo.save(existing);
+    }
+
+    // 不存在，创建新记录
+    return this.create(userId, data);
+  }
+
   // 更新食物
   async update(userId: number, id: number, data: Partial<UserFood>) {
     const food = await this.userFoodRepo.findOne({ where: { id, userId } });
