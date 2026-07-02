@@ -32,6 +32,9 @@ export class QuickFood {
   @Column({ default: 0 })
   sortOrder: number; // 排序序号
 
+  @Column({ default: 'any' })
+  meal: string; // 所属时段: breakfast/lunch/dinner/snack/any
+
   @Column({ default: true })
   isActive: boolean;
 }

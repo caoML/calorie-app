@@ -2,6 +2,90 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AiEstimateService {
+  // 多食物解析：用户输入一句话，AI 解析出所有食物及热量
+  async parseMultiFoods(text: string): Promise<{
+    foods: {
+      name: string;
+      amount: number;
+      unit: string;
+      kcal: number;
+      kcalPer100g: number;
+      category: string;
+    }[];
+  }> {
+    const prompt = `你是一个专业的营养师。请从用户的饮食描述中，识别出所有食物，并估算每种食物的份量和热量。
+
+用户描述："${text}"
+
+请严格按照以下JSON格式返回（不要添加任何其他文字）：
+{
+  "foods": [
+    {
+      "name": "食物名称",
+      "amount": 重量(克,数字),
+      "unit": "g",
+      "kcal": 该份量的总热量(大卡,数字),
+      "kcalPer100g": 每100克热量(大卡,数字),
+      "category": "分类(staple/meat/vegetable/fruit/drink/snack/dish)"
+    }
+  ]
+}
+
+注意：
+1. 识别出描述中所有食物，每种一条
+2. 根据用户描述的份量估算克数（一碗≈200g，一盘≈250g，一杯≈350ml，一个包子≈80g，一个鸡蛋≈50g）
+3. 如果用户没说份量，使用常见一份的量
+4. 热量基于中国常见做法估算
+5. kcal = kcalPer100g × amount / 100
+6. 如果识别不出任何食物，返回 {"foods": []}`;
+
+    try {
+      const apiKey = process.env.AI_API_KEY || '';
+      const apiUrl = process.env.AI_API_URL || 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+      const model = process.env.AI_MODEL || 'glm-4-plus';
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.3,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`AI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content || '';
+
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('AI 返回格式异常');
+      }
+
+      const result = JSON.parse(jsonMatch[0]);
+      return {
+        foods: (result.foods || []).map((f: any) => ({
+          name: f.name || '未知食物',
+          amount: Number(f.amount) || 200,
+          unit: f.unit || 'g',
+          kcal: Number(f.kcal) || Math.round((Number(f.kcalPer100g) || 100) * (Number(f.amount) || 200) / 100),
+          kcalPer100g: Number(f.kcalPer100g) || 100,
+          category: f.category || 'dish',
+        })),
+      };
+    } catch (error) {
+      console.error('多食物解析失败:', error.message);
+      return { foods: [] };
+    }
+  }
+
   // 调用大模型估算食物热量
   async estimateCalories(foodName: string): Promise<{
     name: string;
@@ -71,7 +155,7 @@ export class AiEstimateService {
 
       return {
         name: result.name || foodName,
-        kcalPer100g: Number(result.kcalPer100g) || 150,
+        kcalPer100g: result.kcalPer100g != null ? Number(result.kcalPer100g) : 150,
         category: result.category || 'dish',
         tip: result.tip || '',
         servings: result.servings || [
@@ -202,6 +286,252 @@ ${mealsDesc}
       console.error('AI 营养分析失败:', error.message);
       // AI 失败时返回 null，前端会 fallback 到本地规则
       return null;
+    }
+  }
+
+  // ====== 语音录音识别 + 解析（一站式） ======
+  async recognizeAndParse(audioBuffer: Buffer, filename: string): Promise<{
+    text: string;
+    foods: {
+      name: string;
+      amount: number;
+      unit: string;
+      kcal: number;
+      kcalPer100g: number;
+      category: string;
+    }[];
+    summary: string;
+  }> {
+    const apiKey = process.env.AI_API_KEY || '';
+    const apiUrl = process.env.AI_API_URL || 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+    const voiceModel = process.env.AI_VOICE_MODEL || process.env.AI_MODEL || 'glm-4-plus';
+
+    // 将音频转为 base64
+    const audioBase64 = audioBuffer.toString('base64');
+    const ext = filename.split('.').pop() || 'mp3';
+
+    // 尝试使用支持音频输入的模型做一站式处理（语音识别+食物解析）
+    const prompt = `请完成以下两步任务：
+1. 先将这段语音内容转为文字
+2. 然后从文字中识别出所有食物及其份量和热量
+
+请严格按照以下JSON格式返回（不要添加任何其他文字）：
+{
+  "text": "语音转写的文字内容",
+  "foods": [
+    {
+      "name": "食物名称",
+      "amount": 重量(克,数字),
+      "unit": "g",
+      "kcal": 该份量的热量(大卡,数字),
+      "kcalPer100g": 每100克热量(大卡,数字),
+      "category": "分类(staple/meat/vegetable/fruit/drink/snack/dish)"
+    }
+  ],
+  "summary": "一句话总结，如：共2种食物，约650大卡"
+}
+
+注意：
+- 份量参考：一碗米饭约200g、一盘菜约200-250g、一杯奶茶约350ml、一个苹果约200g
+- 如果没说份量就使用常见的一份量
+- 热量基于中国常见做法估算`;
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: voiceModel,
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'audio',
+                  audio: {
+                    data: audioBase64,
+                    format: ext,
+                  },
+                },
+                { type: 'text', text: prompt },
+              ],
+            },
+          ],
+          temperature: 0.3,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content || '';
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const result = JSON.parse(jsonMatch[0]);
+          return {
+            text: result.text || '',
+            foods: (result.foods || []).map((f: any) => ({
+              name: f.name || '未知食物',
+              amount: Number(f.amount) || 200,
+              unit: f.unit || 'g',
+              kcal: Number(f.kcal) || 150,
+              kcalPer100g: Number(f.kcalPer100g) || 100,
+              category: f.category || 'dish',
+            })),
+            summary: result.summary || '解析完成',
+          };
+        }
+      }
+
+      // 如果多模态模型不支持音频，降级用语音识别API再调文本解析
+      console.log('多模态音频模型不可用，尝试降级方案...');
+      return await this.fallbackRecognizeAndParse(audioBuffer, ext);
+    } catch (error) {
+      console.error('语音一站式识别失败:', error.message);
+      return await this.fallbackRecognizeAndParse(audioBuffer, ext);
+    }
+  }
+
+  // 降级方案：使用讯飞/百度等语音识别API，或直接返回提示
+  private async fallbackRecognizeAndParse(audioBuffer: Buffer, ext: string): Promise<{
+    text: string;
+    foods: any[];
+    summary: string;
+  }> {
+    // 尝试使用第二个语音识别服务（可配置）
+    const sttUrl = process.env.STT_API_URL || '';
+    const sttKey = process.env.STT_API_KEY || '';
+
+    if (sttUrl && sttKey) {
+      try {
+        const audioBase64 = audioBuffer.toString('base64');
+        const response = await fetch(sttUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sttKey}`,
+          },
+          body: JSON.stringify({
+            audio: audioBase64,
+            format: ext,
+            language: 'zh',
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const text = data.text || data.result || '';
+          if (text) {
+            // 拿到文字后走文本解析流程
+            return {
+              text,
+              ...(await this.parseVoiceText(text)),
+            };
+          }
+        }
+      } catch (e) {
+        console.error('STT 降级识别失败:', e.message);
+      }
+    }
+
+    // 最终降级：返回失败让前端提示用户用文字输入
+    return {
+      text: '',
+      foods: [],
+      summary: '语音识别暂不可用，请点击输入文字描述',
+    };
+  }
+
+  // ====== 语音文本解析 ======
+  async parseVoiceText(text: string): Promise<{
+    foods: {
+      name: string;
+      amount: number;
+      unit: string;
+      kcal: number;
+      kcalPer100g: number;
+      category: string;
+    }[];
+    summary: string;
+  }> {
+    const prompt = `你是一个专业的营养师和自然语言理解专家。请将用户的饮食描述解析为具体的食物列表和热量信息。
+
+用户说："${text}"
+
+请严格按照以下JSON格式返回（不要添加任何其他文字）：
+{
+  "foods": [
+    {
+      "name": "食物名称",
+      "amount": 重量(克,数字),
+      "unit": "g",
+      "kcal": 该份量的热量(大卡,数字),
+      "kcalPer100g": 每100克的热量(大卡,数字),
+      "category": "分类(staple/meat/vegetable/fruit/drink/snack/dish)"
+    }
+  ],
+  "summary": "一句话总结，如：共2种食物，约650大卡"
+}
+
+注意：
+1. 尽量准确识别食物名称和份量（如"一碗米饭"→约200g，"一份红烧肉"→约150g）
+2. 如果用户没有说明份量，使用常见的一份/一碗/一杯的标准量
+3. 如果用户说了多种食物，全部解析出来
+4. 热量估算基于中国常见做法
+5. 常见份量参考：一碗米饭200g、一盘菜200-250g、一杯饮品350ml、一个水果150-200g
+6. 如果用户描述的不是食物（如乱语），返回空的foods数组，summary写"未识别到食物"`;
+
+    try {
+      const apiKey = process.env.AI_API_KEY || '';
+      const apiUrl = process.env.AI_API_URL || 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+      const model = process.env.AI_MODEL || 'glm-4-plus';
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.3,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`AI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content || '';
+
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('AI 返回格式异常');
+      }
+
+      const result = JSON.parse(jsonMatch[0]);
+
+      return {
+        foods: (result.foods || []).map((f: any) => ({
+          name: f.name || '未知食物',
+          amount: Number(f.amount) || 200,
+          unit: f.unit || 'g',
+          kcal: Number(f.kcal) || 150,
+          kcalPer100g: Number(f.kcalPer100g) || 100,
+          category: f.category || 'dish',
+        })),
+        summary: result.summary || '解析完成',
+      };
+    } catch (error) {
+      console.error('语音文本解析失败:', error.message);
+      return {
+        foods: [],
+        summary: '解析失败，请重试',
+      };
     }
   }
 

@@ -5,15 +5,15 @@ import { QuickFood } from './quick-food.entity';
 
 // 系统默认快捷食物（用户首次使用时自动初始化）
 const DEFAULT_QUICK_FOODS = [
-  { name: '一碗米饭', foodName: '米饭', amount: 200, unit: 'g', kcal: 232, icon: '🍚', sortOrder: 0 },
-  { name: '一碗粉/面', foodName: '米粉', amount: 300, unit: 'g', kcal: 348, icon: '🍜', sortOrder: 1 },
-  { name: '一个鸡蛋', foodName: '鸡蛋(煮)', amount: 50, unit: 'g', kcal: 72, icon: '🥚', sortOrder: 2 },
-  { name: '一个蛋白', foodName: '鸡蛋白(去黄)', amount: 33, unit: 'g', kcal: 16, icon: '🍳', sortOrder: 3 },
-  { name: '一杯牛奶', foodName: '牛奶', amount: 250, unit: 'ml', kcal: 162, icon: '🥛', sortOrder: 4 },
-  { name: '一个苹果', foodName: '苹果', amount: 200, unit: 'g', kcal: 104, icon: '🍎', sortOrder: 5 },
-  { name: '一份青菜', foodName: '青菜(炒)', amount: 200, unit: 'g', kcal: 60, icon: '🥬', sortOrder: 6 },
-  { name: '一杯咖啡', foodName: '黑咖啡', amount: 240, unit: 'ml', kcal: 5, icon: '☕', sortOrder: 7 },
-  { name: '一片面包', foodName: '全麦面包', amount: 40, unit: 'g', kcal: 98, icon: '🍞', sortOrder: 8 },
+  { name: '一碗米饭', foodName: '米饭', amount: 200, unit: 'g', kcal: 232, icon: '🍚', sortOrder: 0, meal: 'lunch' },
+  { name: '一碗粉/面', foodName: '米粉', amount: 300, unit: 'g', kcal: 348, icon: '🍜', sortOrder: 1, meal: 'lunch' },
+  { name: '一个鸡蛋', foodName: '鸡蛋(煮)', amount: 50, unit: 'g', kcal: 72, icon: '🥚', sortOrder: 2, meal: 'breakfast' },
+  { name: '一个蛋白', foodName: '鸡蛋白(去黄)', amount: 33, unit: 'g', kcal: 16, icon: '🍳', sortOrder: 3, meal: 'breakfast' },
+  { name: '一杯牛奶', foodName: '牛奶', amount: 250, unit: 'ml', kcal: 162, icon: '🥛', sortOrder: 4, meal: 'breakfast' },
+  { name: '一个苹果', foodName: '苹果', amount: 200, unit: 'g', kcal: 104, icon: '🍎', sortOrder: 5, meal: 'snack' },
+  { name: '一份青菜', foodName: '青菜(炒)', amount: 200, unit: 'g', kcal: 60, icon: '🥬', sortOrder: 6, meal: 'dinner' },
+  { name: '一杯咖啡', foodName: '黑咖啡', amount: 240, unit: 'ml', kcal: 5, icon: '☕', sortOrder: 7, meal: 'snack' },
+  { name: '一片面包', foodName: '全麦面包', amount: 40, unit: 'g', kcal: 98, icon: '🍞', sortOrder: 8, meal: 'breakfast' },
 ];
 
 @Injectable()
